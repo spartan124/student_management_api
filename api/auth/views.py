@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from ..utils import Utils
 from flask import request
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import check_password_hash, generate_password_hash
