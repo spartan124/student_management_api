@@ -2,7 +2,7 @@ from http import HTTPStatus
 from flask import request
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..models.students import Students
+from ..models.students import Student
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 namespace = Namespace("auth", description="namespace for students authentication")
@@ -43,7 +43,7 @@ class Signup(Resource):
         
         data = namespace.payload
         
-        new_student = Students(
+        new_student = Student(
             name = data.get("name"),
             email = data.get("email"),
             password_hash = generate_password_hash(data.get("password"))
@@ -52,3 +52,40 @@ class Signup(Resource):
         new_student.save()
         
         return new_student, HTTPStatus.CREATED
+    
+@namespace.route('/login')
+class Login(Resource):
+    @namespace.expect(login_model)
+    def post(self):
+        """Generate JWT access and refresh tokens
+        """
+        
+        data = namespace.payload
+        
+        email = data.get('email')
+        password = data.get('password')
+        
+        user = Student.query.filter_by(email=email).first()
+        
+        if (user is not None) and (check_password_hash(user.password_hash, password)):
+            access_token = create_access_token(identity=user.email)
+            refresh_token = create_refresh_token(identity=user.email)
+            
+            response = {
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }
+            
+            return response, HTTPStatus.CREATED
+        
+@namespace.route('/refresh')
+class Refresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        email = get_jwt_identity()
+        access_token = create_access_token(identity=email)
+        response = {
+            'access_token':access_token
+        }
+        return response, HTTPStatus.CREATED
+    
