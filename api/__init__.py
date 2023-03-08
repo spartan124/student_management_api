@@ -3,9 +3,13 @@ from flask_restx import Api
 from .db import db
 from .config.config import config_dict
 from .auth.views import namespace as auth_namespace
+from .resources.teachers import namespace as teacher_namespace
+from .resources.students import namespace as student_namespace
 from .models.students import Student
+from .models.teachers import Teacher
+from .models.courses import Course
 from flask_jwt_extended import JWTManager
-
+from flask_migrate import Migrate
 
 def create_app(config=config_dict['dev']):
     app = Flask(__name__)
@@ -13,6 +17,8 @@ def create_app(config=config_dict['dev']):
     app.config.from_object(config)
     
     db.init_app(app)
+    
+    migrate = Migrate(app, db)
     
     jwt = JWTManager(app)
     authorizations= {
@@ -34,13 +40,16 @@ def create_app(config=config_dict['dev']):
     
     
     api.add_namespace(auth_namespace)
+    api.add_namespace(teacher_namespace)
+    api.add_namespace(student_namespace)
     
     @app.shell_context_processor
     def make_shell_context():
         return {
             'db': db,
             'Student': Student,
-            # 'Order': Order
+            'Teacher': Teacher,
+            'Course': Course
 
         }
     return app
