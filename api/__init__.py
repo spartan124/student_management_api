@@ -11,7 +11,7 @@ from .models.courses import Course
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
-def create_app(config=config_dict['dev']):
+def create_app(config=config_dict['prod']):
     app = Flask(__name__)
     
     app.config.from_object(config)
