@@ -19,7 +19,7 @@ signup_model = namespace.model(
 student_model = namespace.model(
     "Student",
     {
-        "id": fields.Integer(),
+        "student_id": fields.Integer(),
         "name": fields.String(required=True, description="Student's name"),
         "email": fields.String(required=True, description="Student's email"),
         "password_hash": fields.String(required=True, description="Student's password"),
