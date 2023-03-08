@@ -17,8 +17,8 @@ class DevConfig(Config):
     DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
-    # SQLALCHEMY_DATABASE_URI = 'postgres://rityixbcuhbgay:c494102735987ed7b7192dace5b26e383cc8a2e269db794b8f767d6bc1db0d68@ec2-34-192-210-139.compute-1.amazonaws.com:5432/d6g39g5uha01e2'
+    # SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
+    SQLALCHEMY_DATABASE_URI = 'postgres://rityixbcuhbgay:c494102735987ed7b7192dace5b26e383cc8a2e269db794b8f767d6bc1db0d68@ec2-34-192-210-139.compute-1.amazonaws.com:5432/d6g39g5uha01e2'
 
 
 class TestConfig(Config):
