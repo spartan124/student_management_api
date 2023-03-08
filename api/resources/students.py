@@ -1,5 +1,5 @@
 from flask_restx import Namespace, fields, Resource
-
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.courses import Course
 from ..models.student_course import StudentCourse
 from ..models.students import Student
@@ -30,6 +30,7 @@ student_course_model = namespace.model(
 class AddGetCourse(Resource):
     #@namespace.expect(course_model)
     @namespace.marshal_with(course_model)
+    @jwt_required()
     def post(self):
         """Add a course 
         """
@@ -47,7 +48,9 @@ class AddGetCourse(Resource):
         add_course.save()
         
         return add_course, 201
+    
     @namespace.marshal_with(course_model)    
+    @jwt_required()
     def get(self):
         """Retrieves all Courses
         """
@@ -57,6 +60,7 @@ class AddGetCourse(Resource):
 @namespace.route('/course/<int:course_id>')
 class GetDeleteUpdateCourse(Resource):
     @namespace.marshal_with(course_model)
+    @jwt_required()
     def get(self, course_id):
         """Retrieve a Course
 
@@ -68,6 +72,7 @@ class GetDeleteUpdateCourse(Resource):
     
     @namespace.expect(course_model)
     @namespace.marshal_with(course_model)
+    @jwt_required()
     def put(self, course_id):
         """Update a Course
 
@@ -87,10 +92,26 @@ class GetDeleteUpdateCourse(Resource):
         course_to_update.update()
         return course_to_update, 204
     
+    @namespace.marshal_with(course_model)
+    @jwt_required()
+    def get(self, course_id):
+        """Delete a Course
+
+        Args:
+            course_id (_int_): _Course ID_
+
+        Returns:
+            _type_: _description_
+        """
+        course = Course.get_by_id(course_id)
+        course.delete()
+        return {'message': '{course.course_title} successfully deleted'}, 200
+    
 @namespace.route('/<int:student_id>/course/enroll')    
 class EnrollStudentToCourse(Resource):
     @namespace.expect(student_course_model)
     @namespace.marshal_with(student_course_model)
+    @jwt_required()
     def post(self, student_id):
         """Enroll a student to a course
 
@@ -110,7 +131,7 @@ class EnrollStudentToCourse(Resource):
     
 @namespace.route('/<int:student_id>/courses')
 class GetEnrolledCourses(Resource):
-    
+    @jwt_required()
     @namespace.marshal_with(course_model)
     def get(self, student_id):
         """Get Student's enrolled Courses
