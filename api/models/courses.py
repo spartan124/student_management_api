@@ -12,7 +12,7 @@ class Course(db.Model):
     teacher_id = db.Column(db.Integer(), db.ForeignKey('teachers.teacher_id'))
     
     def __repr__(self):
-        return f"<Course {self.id}>"
+        return f"Course Code: {self.course_code}"
     
     def save(self):
         db.session.add(self)
