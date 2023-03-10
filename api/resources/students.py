@@ -6,6 +6,15 @@ from ..models.students import Student
 
 namespace = Namespace('students', description='Student Operations')
 
+student_model = namespace.model(
+    "Student",
+    {
+        "student_id": fields.Integer(description="Student ID"),
+        "name": fields.String(description="Student name"),
+        "email": fields.String(description="Student's Email"),
+        "courses": fields.String(description="Student's Courses")
+    }
+)
 course_model = namespace.model(
     "Course",
     {
@@ -25,88 +34,18 @@ student_course_model = namespace.model(
     }
     
 )
-
-@namespace.route('/course')
-class AddGetCourse(Resource):
-    #@namespace.expect(course_model)
-    @namespace.marshal_with(course_model)
-    @jwt_required()
-    def post(self):
-        """Add a course 
-        """
-        data = namespace.payload
-        
-        add_course = Course(
-            
-            course_title = data.get('course_title'),
-            course_code = data.get('course_code'),
-            description = data.get('description'),
-            credit_unit = data.get('credit_unit'),
-            teacher_id = data.get('teacher_id'),
-        )
-        
-        add_course.save()
-        
-        return add_course, 201
-    
-    @namespace.marshal_with(course_model)    
-    @jwt_required()
+@namespace.route('/')
+class GetAllStudents(Resource):
+    @namespace.marshal_with(student_model)
     def get(self):
-        """Retrieves all Courses
-        """
-        courses = Course.query.all()
-        return courses, 200
-    
-@namespace.route('/course/<int:course_id>')
-class GetDeleteUpdateCourse(Resource):
-    @namespace.marshal_with(course_model)
-    @jwt_required()
-    def get(self, course_id):
-        """Retrieve a Course
-
-        Args:
-            course_id (int): ID of the course to retrieve
-        """
-        course = Course.get_by_id(course_id)
-        return course, 200
-    
-    @namespace.expect(course_model)
-    @namespace.marshal_with(course_model)
-    @jwt_required()
-    def put(self, course_id):
-        """Update a Course
-
-        Args:
-            course_id (int): ID of the course to Update
-        """
-        course_to_update = Course.get_by_id(course_id)
-        
-        data = namespace.payload
-        
-        course_to_update.course_title = data['course_title']
-        course_to_update.description = data['description']
-        course_to_update.credit_unit = data['credit_unit']
-        course_to_update.course_code = data['course_code']
-        course_to_update.teacher_id = data['teacher_id']
-        
-        course_to_update.update()
-        return course_to_update, 204
-    
-    @namespace.marshal_with(course_model)
-    @jwt_required()
-    def get(self, course_id):
-        """Delete a Course
-
-        Args:
-            course_id (_int_): _Course ID_
+        """_Get all Students_
 
         Returns:
-            _type_: _description_
+            _list_: _List of Students_
         """
-        course = Course.get_by_id(course_id)
-        course.delete()
-        return {'message': '{course.course_title} successfully deleted'}, 200
-    
+        students = Student.query.all()
+        return students, 200
+
 @namespace.route('/<int:student_id>/course/enroll')    
 class EnrollStudentToCourse(Resource):
     @namespace.expect(student_course_model)

@@ -8,7 +8,7 @@ class Teacher(db.Model):
     email = db.Column(db.String(80), nullable=False, unique=True)
     courses = db.relationship('Course', backref='student_courses')
     def __repr__(self):
-        return f"<Teacher {self.id}>"
+        return f"<Teacher {self.name}>"
     
     def save(self):
         db.session.add(self)
