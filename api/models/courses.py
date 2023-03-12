@@ -10,6 +10,7 @@ class Course(db.Model):
     description = db.Column(db.String(500), nullable=True)
     credit_unit = db.Column(db.Integer(), nullable=False)
     teacher_id = db.Column(db.Integer(), db.ForeignKey('teachers.teacher_id'))
+    students = db.relationship('Student', secondary='student_course')
     
     def __repr__(self):
         return f"Course Code: {self.course_code}"
