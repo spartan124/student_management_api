@@ -2,8 +2,7 @@ from flask_restx import Namespace, fields, Resource
 from flask import abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.courses import Course
-from ..models.student_course import StudentCourse
-from ..models.students import Student
+
 
 namespace = Namespace('course', description='Course Operations')
 
