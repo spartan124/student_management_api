@@ -31,6 +31,7 @@ class StudentResult(db.Model):
             
             return round(gpa * 4.0 / 5.0, 2)
 
+
     def __repr__(self):
         return f"{self.id}"
 

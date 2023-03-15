@@ -2,13 +2,17 @@ from flask_restx import Namespace, Resource, fields
 from flask import abort, jsonify
 from flask_jwt_extended import jwt_required
 from ..models.student_course import StudentCourse
+from ..models.courses import Course
+from ..models.results import StudentResult
+
 
 namespace = Namespace("grades", description='Operation on grades')
 
 grades_model = namespace.model(
     "Grades",
     {
-        'grade': fields.String(description='Student grade in course'),
+
+        'grade': fields.String(description='Student grade in course')
     }
 )
 results_model = namespace.model(
@@ -24,19 +28,20 @@ results_model = namespace.model(
     }
 )
 
-namespace.route('/grades')
+@namespace.route('/<int:student_id>/<int:course_id>/add')
 class Grade(Resource):
     @namespace.expect(grades_model)
-    def post(self):
+    def post(self, student_id, course_id):
         """Add course grade for student
 
         Returns:
             _type_: _description_
         """
         data = namespace.payload
-        student_id = data['student_id']
-        course_id = data['course_id']
+        
         grade = data['grade']
+        # earned_credit = student_course.earned_credit
+        course = Course.get_by_id(course_id)
         
         course = Course.get_by_id(course_id)
         
@@ -44,21 +49,15 @@ class Grade(Resource):
             student_id=student_id, course_id=course_id
         ).first()
         
-        
         if not student_course:
-            abort(404, f"Student {student_id} not enrolled in course {course_id}")
+            abort(404, f"Student with Student ID {student_id} not enrolled in {course.course_code}")
             
         student_course.grade = grade
-        
-        student_course.update()
-        
         student_course.save()
-        
         return {'message': f"Grade added for student {student_id} in  {course.course_code}"}, 201
 
 @namespace.route('/<int:student_id>/<int:course_id>')
 class StudentCourseGrade(Resource):
-    # @namespace.marshal_list_with(grades_model)
     def get(self, student_id, course_id):
         """Retrieve a specific student grade for a specific course
 
@@ -76,8 +75,10 @@ class StudentCourseGrade(Resource):
             abort(404, f"Student {student_id} not enrolled in course {course.course_code}")
             
         grade = student_course.grade
+
         return grade, 200
         # return jsonify(f"Student with ID {student_id} got Grade {grade} in {course.course_code}" )
+
     
 @namespace.route('/results/<int:student_id>/<int:course_id>')    
 class AddResults(Resource):

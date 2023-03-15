@@ -29,3 +29,15 @@ class StudentCourse(db.Model):
     @classmethod
     def get_by_id(cls, id):
         return cls.query.get_or_404(id)
+    
+    @property
+    def earned_credit(self):
+        if self.grade == 'A':
+            return self.course.credit_unit * 5
+        elif self.grade == 'B':
+            return self.course.credit_unit * 4
+        elif self.grade == 'C':
+            return self.course.credit_unit * 3
+        else:
+            return 0
+        
