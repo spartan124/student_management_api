@@ -3,12 +3,14 @@ from ..db import db
 class StudentCourse(db.Model):
     __tablename__= 'student_course'
     student_id = db.Column(db.Integer(), db.ForeignKey('students.student_id'), primary_key=True)
-    course_id = db.Column(db.Integer(), db.ForeignKey('courses.course_id'), primary_key=True)
+    course_id = db.Column(db.Integer(), db.ForeignKey('courses.course_id'))
     grade = db.Column(db.String())
-    # students = db.relationship('Student', backref='student_course')
-    #credit_unit = db.Column(db.Float(), nullable=False)
-    #earned_credit = db.Column(db.Float(), nullable=True)
-    #teacher = db.relationship('Teacher', secondary='courses', backref='student_courses')
+    earned_credit = db.Column(db.Float())
+    gpa = db.Column(db.Float())
+    
+    #students = db.relationship('Student', back_populates='courses')
+    course = db.relationship('Course', backref='student_course')
+   
     
     def __repr__(self):
         return f"<Student Course ID {self.student_id}>"
