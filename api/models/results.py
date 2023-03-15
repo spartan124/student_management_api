@@ -12,6 +12,25 @@ class StudentResult(db.Model):
     grade = db.Column(db.String(2), nullable=False)
     earned_credit = db.Column(db.Integer(), nullable=False)
     # student_gpa = db.Column(db.Float())
+    
+    @property
+    def gpa(self):
+        total_credits = 0
+        total_earned_credits = 0
+        
+        for course in self.courses:
+            total_credits += course.credit_unit
+            
+        for student_course in self.student_courses:    
+            total_earned_credits += student_course.earned_credit
+            
+        if total_credits == 0:
+            return 0
+        else:
+            gpa = total_earned_credits / total_credits
+            
+            return round(gpa * 4.0 / 5.0, 2)
+
 
     def __repr__(self):
         return f"{self.id}"

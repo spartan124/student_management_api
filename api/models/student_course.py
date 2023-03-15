@@ -4,7 +4,7 @@ class StudentCourse(db.Model):
     __tablename__= 'student_course'
     student_id = db.Column(db.Integer(), db.ForeignKey('students.student_id'), primary_key=True)
     course_id = db.Column(db.Integer(), db.ForeignKey('courses.course_id'))
-    grade = db.Column(db.String(1))
+    grade = db.Column(db.String())
     earned_credit = db.Column(db.Float())
     gpa = db.Column(db.Float())
     
