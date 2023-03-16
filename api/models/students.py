@@ -9,7 +9,7 @@ class Student(db.Model):
     gpa = db.Column(db.Float())
     courses = db.relationship('Course', secondary='student_course')
     student_courses = db.relationship('StudentCourse', backref= 'students')
-    student_results = db.relationship('Course', secondary='student_results')
+    # student_results = db.relationship('Course', secondary='student_results')
     def __repr__(self):
         return f"<Student {self.name}>"
     
