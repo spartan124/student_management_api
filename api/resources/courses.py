@@ -1,5 +1,4 @@
-from flask_restx import Namespace, fields, Resource
-from flask import abort
+from flask_restx import Namespace, fields, Resource, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.courses import Course
 
@@ -9,7 +8,6 @@ namespace = Namespace('course', description='Course Operations')
 course_model = namespace.model(
     "Course",
     {
-        "course_id": fields.Integer(description='Course ID'),
         "course_title": fields.String(description='Course title', required=True),
         "course_code": fields.String(description='Course title', required=True),
         "description": fields.String(description='Course description', required=True),
@@ -17,13 +15,18 @@ course_model = namespace.model(
         "teacher_id": fields.Integer(description='course teacher ID', required=True),
     }
 )
+clone_course_model = namespace.clone(
+    "Course", course_model, {
+        "course_id": fields.Integer(description='Course ID'),  
+    }
+)
 student_model = namespace.model(
     "Student",
     {
-        "student_id": fields.Integer(description="Student ID")
-        # "name": fields.String(description="Student name"),
-        # "email": fields.String(description="Student's Email"),
-        #"courses": fields.String(description="Student's Courses")
+        "student_id": fields.Integer(description="Student ID"),
+        "name": fields.String(description="Student name"),
+        "email": fields.String(description="Student's Email"),
+        "courses": fields.String(description="Student's Courses")
     }
 )
 
@@ -31,6 +34,7 @@ student_model = namespace.model(
 @namespace.route('/')
 class AddGetCourse(Resource):
     @namespace.expect(course_model)
+    @namespace.marshal_with(clone_course_model)
     @namespace.doc(
         description='Add a course to the courses database table'
     )
@@ -40,23 +44,28 @@ class AddGetCourse(Resource):
         """
         data = namespace.payload
         
-        course = Course.query.filter_by(course_code=data['course_code']).first()
+        course_title = data.get('course_title')
+        course_code = data.get('course_code')
+        description = data.get('description')
+        credit_unit = data.get('credit_unit')
+        teacher_id = data.get('teacher_id')
+        
+        course = Course.query.filter_by(course_code=course_code).first()
         
         if course is None:
-            course = Course(
-                
-                course_title = data.get('course_title'),
-                course_code = data.get('course_code'),
-                description = data.get('description'),
-                credit_unit = data.get('credit_unit'),
-                teacher_id = data.get('teacher_id'),
+            add_course = Course( 
+                course_title = course_title,
+                course_code = course_code,
+                description = description,
+                credit_unit = credit_unit,
+                teacher_id = teacher_id            
             )
             
-            course.save()
+            add_course.save()
         
-            return {'message': f"Added {data['course_code']} to the database"}, 201
+            return add_course, 201
         
-        return {'message': f"Course with course code {data['course_code']} already exists in database"}, 409
+        abort(403, message="Course already enrolled by student")
     
     @namespace.marshal_with(course_model)
     @namespace.doc(description='Get all courses from the database')    
@@ -117,7 +126,7 @@ class GetDeleteUpdateCourse(Resource):
         course_to_update.update()
         return course_to_update, 201
     
-    @namespace.marshal_with(course_model)
+    
     @namespace.doc(
         description='Delete a specific course from database.',
         params = {
@@ -131,12 +140,12 @@ class GetDeleteUpdateCourse(Resource):
         Args:
             course_id (_int_): Course ID
         """
-        course = Course.get_by_id(course_id)
+        course = Course.query.filter_by(course_id=course_id).first()
         if course is None:
-            return {"message": "Course with {course.course_id} not found"}
+            abort(404, message="Course not found in database")
         else:
             course.delete()
-            return {'message': '{course.course_title} successfully deleted'}, 200
+            return {'message': 'Course successfully deleted'}, 200
 
 @namespace.route('/<int:course_id>/students')
 class EnrolledStudents(Resource):
