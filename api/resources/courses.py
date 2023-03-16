@@ -66,7 +66,7 @@ class AddGetCourse(Resource):
 
         abort(403, message="Course already enrolled by student")
 
-    @namespace.marshal_with(course_model)
+    @namespace.marshal_with(clone_course_model)
     @namespace.doc(description="Get all courses from the database")
     @jwt_required()
     def get(self):
@@ -96,7 +96,7 @@ class GetDeleteUpdateCourse(Resource):
         return course, 200
 
     @namespace.expect(course_model)
-    @namespace.marshal_with(course_model)
+    @namespace.marshal_with(clone_course_model)
     @namespace.doc(
         description="Update a specific course on the database",
         params={"course_id": "ID of the course to update."},
@@ -108,9 +108,11 @@ class GetDeleteUpdateCourse(Resource):
         Args:
             course_id (int): ID of the course to Update
         """
-        course_to_update = Course.get_by_id(course_id)
+        course_to_update = Course.query.filter_by(course_id=course_id).first()
 
         data = namespace.payload
+        if not course_to_update:
+            abort(404, message="Course not Found")
 
         course_to_update.course_title = data["course_title"]
         course_to_update.description = data["description"]
