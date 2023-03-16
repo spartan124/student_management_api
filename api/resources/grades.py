@@ -1,5 +1,5 @@
-from flask_restx import Namespace, Resource, fields
-from flask import abort, jsonify
+from flask_restx import Namespace, Resource, fields, abort
+
 from flask_jwt_extended import jwt_required
 from ..models.student_course import StudentCourse
 from ..models.courses import Course
@@ -9,21 +9,19 @@ from ..models.results import StudentResult
 namespace = Namespace("grades", description='Operation on grades')
 
 grades_model = namespace.model(
-    "Grades",
-    {
-
-        'grade': fields.String(description='Student grade in course')
+    "StudentCourse",  {
+        "grade": fields.String(description='Student grade in course')
     }
 )
 results_model = namespace.model(
-    "Results",
+    "Result",
     {
         "course_id": fields.Integer(description="Course ID"),
         "course_code": fields.String(description="Course title", required=True),
         "course_title": fields.String(description="Course title", required=True),
         "credit_unit": fields.Integer(description="course credit unit", required=True),
-        'grade': fields.String(description='Grade in Course'),
-        'earned_credit': fields.String(description='Credit unit earned'),
+        "grade": fields.String(description='Grade in Course'),
+        "earned_credit": fields.String(description='Credit unit earned'),
         
     }
 )
@@ -31,6 +29,7 @@ results_model = namespace.model(
 @namespace.route('/<int:student_id>/<int:course_id>/add')
 class Grade(Resource):
     @namespace.expect(grades_model)
+    @namespace.marshal_with(grades_model)
     def post(self, student_id, course_id):
         """Add course grade for student
 
@@ -40,24 +39,29 @@ class Grade(Resource):
         data = namespace.payload
         
         grade = data['grade']
-        # earned_credit = student_course.earned_credit
-        course = Course.get_by_id(course_id)
         
-        course = Course.get_by_id(course_id)
+        
         
         student_course = StudentCourse.query.filter_by(
             student_id=student_id, course_id=course_id
         ).first()
         
         if not student_course:
-            abort(404, f"Student with Student ID {student_id} not enrolled in {course.course_code}")
+            abort(404, message="Student Record not found ")
+            
+        course_grade = student_course.grade
+        if course_grade:
+            abort(403, message="Grade already exist for this student course")
             
         student_course.grade = grade
+        
         student_course.save()
-        return {'message': f"Grade added for student {student_id} in  {course.course_code}"}, 201
+        # return {'message': f"Grade added for student {student_id} in  {course.course_code}"}, 201
+        return student_course, 201
 
 @namespace.route('/<int:student_id>/<int:course_id>')
 class StudentCourseGrade(Resource):
+    @namespace.marshal_with(grades_model)
     def get(self, student_id, course_id):
         """Retrieve a specific student grade for a specific course
 
@@ -65,19 +69,18 @@ class StudentCourseGrade(Resource):
             student_id (_int_): Student ID
             course_id (_int_): Course ID
         """
-        course = Course.get_by_id(course_id)
         
         student_course = StudentCourse.query.filter_by(
             student_id=student_id, course_id=course_id
         ).first()
         
         if not student_course:
-            abort(404, f"Student {student_id} not enrolled in course {course.course_code}")
+            abort(404, message="Record not found for this course")
+        
             
-        grade = student_course.grade
+        student_course.grade
 
-        return grade, 200
-        # return jsonify(f"Student with ID {student_id} got Grade {grade} in {course.course_code}" )
+        return student_course, 200
 
     
 @namespace.route('/results/<int:student_id>/<int:course_id>')    
