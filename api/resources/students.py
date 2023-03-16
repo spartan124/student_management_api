@@ -1,6 +1,5 @@
-from flask import abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource, fields, abort
 
 from ..models.courses import Course
 from ..models.student_course import StudentCourse
@@ -24,17 +23,16 @@ course_model = namespace.model(
         "course_id": fields.Integer(description="Course ID"),
         "course_title": fields.String(description="Course title", required=True),
         "course_code": fields.String(description="Course title", required=True),
-        # "description": fields.String(description="Course description", required=True),
         "credit_unit": fields.Integer(description="course credit unit", required=True),
-        # "teacher_id": fields.Integer(description="course teacher ID", required=True),
+        
     },
 )
 student_course_model = namespace.model(
-    "Enrollment",
+    "StudentCourse",
     {
         "student_id": fields.Integer(description="Student ID"),
         "course_id": fields.Integer(description="Course ID"),
-        "credit_unit": fields.Integer(description="course credit unit", required=True),
+        # "credit_unit": fields.Integer(description="course credit unit", required=True),
     },
 )
 results_model =namespace.model(
@@ -63,33 +61,38 @@ class GetAllStudents(Resource):
         return students, 200
 
 
-@namespace.route("/<int:student_id>/course")
+@namespace.route("/<int:student_id>/course/<int:course_id>/enroll")
 class EnrollStudentToCourse(Resource):
-    @namespace.expect(student_course_model)
+    
     @namespace.marshal_with(student_course_model)
     @namespace.doc(
         description="Enrolling a student to a course",
         params={
-            # "course_id": "ID of the course to enroll",
             "student_id": "Id of student to be enrolled in the course",
-        },
+            "course_id" : "ID of the course to enroll student for"
+        }
     )
-    # @jwt_required()
-    def post(self, student_id):
+    @jwt_required()
+    def post(self, student_id, course_id):
         """Enroll a student to a course
 
         Args:
             student_id (_int_): Student ID
+            course_id (_int_): Course ID
+            
         """
+        student_course = StudentCourse.query.filter_by(course_id=course_id, student_id=student_id).first()
+        if not student_course:
+            student_course = StudentCourse(
+                course_id=course_id, 
+                student_id=student_id
+            )
 
-        data = namespace.payload
-
-        student_course = StudentCourse(
-            course_id=data["course_id"], student_id=student_id
-        )
-
-        student_course.save()
-        return student_course, 201
+            student_course.save()
+            
+            return student_course, 201
+        
+        abort(403, message="Student already enrolled in course")
 
 
 @namespace.route("/<int:student_id>/courses")
@@ -102,14 +105,17 @@ class GetEnrolledCourses(Resource):
             'student_id': 'ID of the student'
         }
     )
-    # @jwt_required()
+    @jwt_required()
     def get(self, student_id):
         """Get Student's enrolled Courses
 
         Args:
             student_id (_int_): _Student ID_
         """
-        student = Student.get_by_id(student_id)
+        student = Student.query.filter_by(student_id=student_id).first()
+        if student is None:
+            abort(404, message="Student not found in database")
+            
         courses = student.courses
 
         return courses, 200
