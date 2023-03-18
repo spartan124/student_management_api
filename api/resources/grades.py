@@ -15,7 +15,7 @@ grades_model = namespace.model(
 )
 
 
-@namespace.route('/<int:student_id>/<int:course_id>/add')
+@namespace.route('/student/<int:student_id>/course/<int:course_id>/add')
 class Grade(Resource):
     @namespace.expect(grades_model)
     @namespace.marshal_with(grades_model)
