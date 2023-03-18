@@ -11,7 +11,6 @@ class Course(db.Model):
     credit_unit = db.Column(db.Integer(), nullable=False)
     teacher_id = db.Column(db.Integer(), db.ForeignKey('teachers.teacher_id'))
     students = db.relationship('StudentCourse', backref='courses')
-    # student_course = db.relationship('StudentCourse', backref='courses')
     
     def __repr__(self):
         return f"{self.course_code}"

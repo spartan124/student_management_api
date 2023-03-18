@@ -135,14 +135,7 @@ class CoursesTestCase(unittest.TestCase):
             'Authorization': f'Bearer {token}'
         }
         
-        course = Course(
-        course_title="Test Course",
-        course_code="TST101",
-        description="This is a test course",
-        credit_unit=3,
-        teacher_id=1,
-        )
-        course.save()
+        
         
         student1 = Student(name='Test Student',
                            email='teststudent@test.com',
@@ -155,9 +148,29 @@ class CoursesTestCase(unittest.TestCase):
                            )
         student2.save()
         
-        course.students.append(student1)
-        course.students.append(student2)
+        course = Course(
+            course_title="Test Course",
+            course_code="TST101",
+            description="This is a test course",
+            credit_unit=3,
+            teacher_id=1,
+        )
+        course.save()
 
+        student_course1 = StudentCourse(
+            course_id=course.course_id,
+            student_id=student1.student_id
+        )
+        student_course1.save()
+        
+        student_course2 = StudentCourse(
+            course_id=course.course_id,
+            student_id=student2.student_id
+        )
+        student_course2.save()
+        
         response = self.client.get("/course/{}/students".format(course.course_id), headers=headers)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
+        
+        print(response.json)
