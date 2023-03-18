@@ -119,3 +119,11 @@ class StudentTestCase(unittest.TestCase):
                                     json=payload, headers=headers)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json['message'], 'Student already enrolled in course')
+        
+        #Test get enrolled courses
+        response = self.client.get('/students/{}/courses'.format(student.student_id), headers=headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json[0]['course_code'], 'PY101')
+        
+        
+        
