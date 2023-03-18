@@ -14,6 +14,7 @@ student_model = namespace.model(
         "name": fields.String(description="Student name"),
         "email": fields.String(description="Student's Email"),
         "courses": fields.String(description="Student's Courses"),
+        "gpa": fields.Float(description="Student's Grade Point Average")
         
     },
 )
