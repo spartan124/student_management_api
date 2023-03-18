@@ -24,9 +24,22 @@ gpa_model = namespace.model(
         "gpa": fields.Float(description="Grade Point Average")
     }
 )
+sc_model = namespace.model(
+    "St_Course", 
+    {
+        "course_id": fields.Integer(description="Course ID"),
+        "student_id": fields.Integer(description="Student ID"),
+    }
+)
 @namespace.route('/student/<int:student_id>/gpa')
 class AddStudeentGPA(Resource):
     @namespace.marshal_with(gpa_model)
+    @namespace.doc(description="Add Student GPA to the student table by calling the .gpa @property",
+        params={
+            "student_id": "ID of the Student"
+        }
+    )
+    @jwt_required()
     def post(self, student_id):
         """Add Student GPA
 
@@ -40,7 +53,12 @@ class AddStudeentGPA(Resource):
         student.gpa
         student.save()
         return {student}, 201
-    
+    @namespace.doc(description="call result sheet function of student to return student result and grades",
+        params={
+            "student_id": "ID of the Student"
+        }
+    )
+    @jwt_required()
     def get(self, student_id):
         """Get result data via a result sheet
 
@@ -51,9 +69,18 @@ class AddStudeentGPA(Resource):
         result_sheet = student.result_sheet()
         return jsonify({'result_sheet': result_sheet})
     
-@namespace.route('/student/<int:student_id>/course/<int:course_id>')    
+@namespace.route('/student/<int:student_id>/course/<int:course_id>/collate')    
 class AddResults(Resource):
+    @namespace.expect(sc_model)
     @namespace.marshal_with(results_model)
+    @namespace.doc(
+        description='Collate all student course records',
+        params= {
+            'student_id': "ID of the Student",
+            'course_id': "ID of the course"
+        }
+    )
+    @jwt_required()
     def post(self, student_id, course_id):
         """Collate Student Results
 
@@ -64,6 +91,9 @@ class AddResults(Resource):
         Returns:
             _dict_: returns a dict list of student results
         """
+        data = namespace.payload
+        student_id = data['student_id']
+        course_id = data['course_id']
         sc = StudentCourse.query.filter_by(student_id=student_id, course_id=course_id).first()
         
         if not sc:
@@ -88,10 +118,15 @@ class AddResults(Resource):
     
         results.save()
         return results, 201
-        
+    
+    @namespace.doc(description="Delete student record for a specific course",
+        params={
+            "student_id": "ID of the Student"
+        }
+    )    
     @jwt_required()   
     def delete(self, student_id, course_id):
-        """Delete a specific student_course record
+        """Delete a specific student course record
 
         Args:
             student_id (_int_): Student ID
