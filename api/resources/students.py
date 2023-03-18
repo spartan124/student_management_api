@@ -123,7 +123,7 @@ class GetEnrolledCourses(Resource):
 
 @namespace.route("/<int:student_id>/details")
 class StudentDetail(Resource):
-    @namespace.marshal_with(results_model)
+    @namespace.marshal_with(student_model)
     @namespace.doc(
         description='Get Student detail',
         params= {
@@ -137,6 +137,7 @@ class StudentDetail(Resource):
         student_data = {
             "student_id": student.student_id,
             "name": student.name,
+            "email": student.email,
             "courses": student.courses,
             "gpa": student.gpa
         }
