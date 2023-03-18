@@ -11,6 +11,7 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=120)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=272)
     JWT_SECRET_KEY = config('JWT_SECRET_KEY')
+    ERROR_INCLUDE_MESSAGE = False
 
 
 class DevConfig(Config):
