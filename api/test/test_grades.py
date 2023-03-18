@@ -1,5 +1,5 @@
 import unittest
-
+import json
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from .. import create_app
@@ -55,3 +55,5 @@ class GradeTestCase(unittest.TestCase):
                                     headers=headers, json=payload
                                     )
         assert response.status_code == 201
+        returned_student_course = json.loads(response.data)
+        assert returned_student_course['grade'] == "A"
