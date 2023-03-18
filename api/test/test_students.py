@@ -126,4 +126,19 @@ class StudentTestCase(unittest.TestCase):
         self.assertEqual(response.json[0]['course_code'], 'PY101')
         
         
+        #Test get student detail
+        student = Student.query.filter_by(student_id=1).first()
+        student.gpa = 3.40
+        response = self.client.get('/students/1/details')
+        data = response.json
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['student_id'], 1)
+        self.assertEqual(data['name'], 'Test Student')
+        self.assertEqual(data['email'], 'teststudent@test.com')
+        self.assertEqual(data['courses'], '[PY101]')
+
+        
+        
+        
         
