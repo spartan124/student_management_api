@@ -12,7 +12,9 @@ teacher_model = namespace.model(
     },
 )
 teacher_clone_model = namespace.clone(
-    "Teacher", teacher_model, {"teacher_id": fields.Integer(description="Teacher ID")}
+    "Teacher", teacher_model, {"teacher_id": fields.Integer(description="Teacher ID"),
+                               'courses': fields.List(fields.String())
+                               }
 )
 
 course_model = namespace.model(
@@ -65,8 +67,8 @@ class AddGetTeachers(Resource):
         return teachers, 200
 
 
-@namespace.route("/<int:teacher_id>/courses")
-class GetTeacherCourses(Resource):
+@namespace.route("/<int:teacher_id>/")
+class GetTeacherandTeacherCourses(Resource):
     @namespace.marshal_with(course_model)
     @namespace.doc(
         description="Get all Courses taught by the specific Teacher",
@@ -88,7 +90,7 @@ class GetTeacherCourses(Resource):
         courses = teacher.courses
 
         return courses, 200
-    
+        
     @namespace.doc(
         description="Delete Records of a Teacher using the Teacher ID",
         params = {
@@ -109,3 +111,24 @@ class GetTeacherCourses(Resource):
         teacher.delete()
         return {"message": "Teacher Successfully deleted from teacher database."}
         
+@namespace.route('/<int:teacher_id>/details')
+class GetSpecificTeacher(Resource):
+    
+    @namespace.marshal_with(teacher_clone_model)
+    @namespace.doc(description='Get a specific teacher by ID',
+                   params={
+                       "teacher_id":"ID of the teacher to get"
+                   })
+    @jwt_required()
+    def get(self, teacher_id):
+        """Get a specific Teacher by ID
+
+        Args:
+            teacher_id (_int_): ID of the Teacher
+        """
+        teacher = Teacher.query.filter_by(teacher_id=teacher_id).first()
+        if not teacher:
+            abort(404, message="Teacher record not found")
+        
+        return teacher, 200
+    
