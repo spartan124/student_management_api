@@ -3,12 +3,10 @@ from ..db import db
 class StudentCourse(db.Model):
     __tablename__= 'student_course'
     student_id = db.Column(db.Integer(), db.ForeignKey('students.student_id'), primary_key=True)
-    course_id = db.Column(db.Integer(), db.ForeignKey('courses.course_id'))
+    course_id = db.Column(db.Integer(), db.ForeignKey('courses.course_id'), primary_key=True)
     grade = db.Column(db.String())
     earned_credit = db.Column(db.Float())
     gpa = db.Column(db.Float())
-    
-    #students = db.relationship('Student', back_populates='courses')
     course = db.relationship('Course', backref='student_course')
    
     
