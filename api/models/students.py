@@ -13,7 +13,7 @@ class Student(db.Model):
 
     # student_results = db.relationship('Course', secondary='student_results')
     def __repr__(self):
-        return f"<Student {self.name}>"
+        return f"{self.name}"
 
     @property
     def gpa(self):
