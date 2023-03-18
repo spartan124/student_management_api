@@ -78,7 +78,6 @@ class StudentTestCase(unittest.TestCase):
         assert response.status_code == 200
         assert len(student) == 2
         assert student != []
-        assert 'Test Student', 'Fun Student' in student
         
     #Test enroll student to a course
     def test_enroll_student_to_course(self):
@@ -115,4 +114,8 @@ class StudentTestCase(unittest.TestCase):
         enrolled = StudentCourse.query.filter_by(student_id=student.student_id, course_id=course.course_id).first()
         self.assertIsNotNone(enrolled)
         
-        
+        #Test duplicate enrollment
+        response = self.client.post("/students/{}/course/{}/enroll".format(student.student_id, course.course_id), 
+                                    json=payload, headers=headers)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json['message'], 'Student already enrolled in course')
