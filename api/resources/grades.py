@@ -45,7 +45,7 @@ class Grade(Resource):
         student_course.save()
         return student_course, 201
 
-@namespace.route('/<int:student_id>/<int:course_id>')
+@namespace.route('/student/<int:student_id>/course/<int:course_id>')
 class StudentCourseGrade(Resource):
     @namespace.marshal_with(grades_model)
     def get(self, student_id, course_id):

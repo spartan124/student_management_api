@@ -90,7 +90,7 @@ class TeacherTestCase(unittest.TestCase):
         assert response.json['message'] == "Teacher record not found"
         # Test delete teacher
         response = self.client.delete('/teachers/{}/'.format(teacher.teacher_id), headers=headers)
-        get_teacher = Teacher.query.get(teacher.teacher_id)
+        get_teacher = Teacher.query.filter_by(teacher_id=teacher.teacher_id).first()
         assert response.status_code == 200
         assert response.json['message'] == "Teacher Successfully deleted from teacher database."
         assert get_teacher is None
