@@ -35,7 +35,7 @@ class Student(db.Model):
 
     def result_sheet(self):
         result = []
-        course_data = {}
+        
         for course in self.courses:
             course_data = {
                 "course_id": course.course_id,
@@ -46,14 +46,14 @@ class Student(db.Model):
             result.append(course_data)
         
         for st_course in self.student_courses:
-            course_data2 = {
-                'grade': st_course.grade,
-                'earned_credit': st_course.earned_credit
-            }
+            for course_data in result:
+                if course_data['course_id'] == st_course.course_id:
+                    course_data.update({
+                        'earned_credit': st_course.earned_credit,
+                        'grade': st_course.grade
+                    })
         
-            result.append(course_data2)
-        
-        gpa_data = {"gpa": self.gpa}
+        gpa_data = {"GPA": self.gpa}
         result.append(gpa_data)
         return result
 
