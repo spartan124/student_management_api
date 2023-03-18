@@ -7,6 +7,7 @@ from .resources.teachers import namespace as teacher_namespace
 from .resources.students import namespace as student_namespace
 from .resources.courses import namespace as course_namespace
 from .resources.grades import namespace as grades_namespace
+from .resources.results import namespace as results_namespace
 from .models.students import Student
 from .models.teachers import Teacher
 from .models.courses import Course
@@ -46,7 +47,7 @@ def create_app(config=config_dict['dev']):
     api.add_namespace(student_namespace)
     api.add_namespace(course_namespace)
     api.add_namespace(grades_namespace)
-    
+    api.add_namespace(results_namespace)
     @app.shell_context_processor
     def make_shell_context():
         return {
