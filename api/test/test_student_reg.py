@@ -24,28 +24,34 @@ class StudentTestCase(unittest.TestCase):
 
     def test_student_registration(self):
         data = {
-            "name": "Test Student",
             "email": "testuser@test.com",
             "password": "password",
+            "name": "Student",
         }
-
         response = self.client.post("/auth/signup", json=data)
         user = Student.query.filter_by(email="testuser@test.com").first()
         assert user.email == "testuser@test.com"
-        assert user.name == "Test Student"
+        assert user.name == "Student"
         assert response.status_code == 201
-    
+        
+        # test a failed signup request (duplicate email)
+        data = {'name': 'Duplicate Student', 'email': 'testuser@test.com', 'password': 'duplicatepassword'}
+        response = self.client.post('/auth/signup', json=data)
+        self.assertEqual(response.status_code, 403)
+
     def test_student_login(self):
         email = 'testuser@test.com'
         password = 'password'
         password_hash = generate_password_hash(password)
         check_password = check_password_hash(password_hash, password)
-        
+
         data = {
-            'email':'testuser@test.com',
+            'email': email,
             'password': check_password
         }
-        
+
+
+         # test a successful login request
         response = self.client.post('auth/login', json=data)
-        
+
         assert response.status_code == 200
