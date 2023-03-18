@@ -57,3 +57,41 @@ class GradeTestCase(unittest.TestCase):
         assert response.status_code == 201
         returned_student_course = json.loads(response.data)
         assert returned_student_course['grade'] == "A"
+        
+    def test_get_student_grade_in_course(self):
+        token = create_access_token(identity='teststudent@test.io')
+        headers = {
+            'Authorization': f'Bearer {token}'
+        }
+        student1 = Student(name='Test Student',
+                           email='teststudent@test.com',
+                           password_hash='password'
+                           )
+        student1.save()
+        
+        course = Course(
+            course_title="Test Course",
+            course_code="TST101",
+            description="This is a test course",
+            credit_unit=3,
+            teacher_id=1,
+        )
+        course.save()
+
+        student_course = StudentCourse(
+            student_id=student1.student_id,
+            course_id=course.course_id, grade="A"
+        )
+        student_course.save()
+        response = self.client.get('/grades/student/{}/course/{}'.format(
+            student_course.student_id, student_course.course_id), headers=headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        data = response.json
+        self.assertEqual(data['grade'], "A")
+        
+    def test_get_student_course_grade_not_found(self):
+        response = self.client.get('/student/999/course/999')
+        
+        self.assertEqual(response.status_code, 404)
