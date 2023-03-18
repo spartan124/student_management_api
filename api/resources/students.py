@@ -28,11 +28,10 @@ course_model = namespace.model(
     },
 )
 student_course_model = namespace.model(
-    "StudentCourse",
+    "EnrollStudent",
     {
         "student_id": fields.Integer(description="Student ID"),
         "course_id": fields.Integer(description="Course ID"),
-        # "credit_unit": fields.Integer(description="course credit unit", required=True),
     },
 )
 results_model =namespace.model(
@@ -63,7 +62,7 @@ class GetAllStudents(Resource):
 
 @namespace.route("/<int:student_id>/course/<int:course_id>/enroll")
 class EnrollStudentToCourse(Resource):
-    
+    @namespace.expect(student_course_model)
     @namespace.marshal_with(student_course_model)
     @namespace.doc(
         description="Enrolling a student to a course",
@@ -81,7 +80,12 @@ class EnrollStudentToCourse(Resource):
             course_id (_int_): Course ID
             
         """
+        data = namespace.payload
+        
         student_course = StudentCourse.query.filter_by(course_id=course_id, student_id=student_id).first()
+        course_id = data.get('course_id')
+        student_id = data.get('student_id')
+        
         if not student_course:
             student_course = StudentCourse(
                 course_id=course_id, 
