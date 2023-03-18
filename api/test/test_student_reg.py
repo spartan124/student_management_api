@@ -1,7 +1,7 @@
 import unittest
 
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from flask_jwt_extended import create_access_token, create_refresh_token
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
@@ -55,3 +55,27 @@ class StudentTestCase(unittest.TestCase):
         response = self.client.post('auth/login', json=data)
 
         assert response.status_code == 200
+    
+    def test_get_all_students(self):
+        token = create_access_token(identity='teststudent@test.io')
+        headers = {
+            'Authorization': f'Bearer {token}'
+        }
+        student1 = Student(name='Test Student',
+                           email='teststudent@test.com',
+                           password_hash='password'
+                           )
+        student1.save()
+        student2 = Student(name='Fun Student',
+                           email='funstudent@test.com',
+                           password_hash='password'
+                           )
+        student2.save()
+        
+        #Test get all students
+        response = self.client.get('/', headers=headers)
+        student = Student.query.all()
+        assert response.status_code == 200
+        assert len(student) == 2
+        
+        
