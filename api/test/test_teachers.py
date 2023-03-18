@@ -85,7 +85,7 @@ class TeacherTestCase(unittest.TestCase):
         assert response.json[1]['course_code'] == "PY103"
         
         # Test get_teacher with wrong teacher_id
-        response = self.client.get("teachers/{}/".format(4000), headers=headers) 
+        response = self.client.get("teachers/88/details", headers=headers) 
         assert response.status_code == 404
         assert response.json['message'] == "Teacher record not found"
         # Test delete teacher
