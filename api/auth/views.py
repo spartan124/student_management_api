@@ -1,5 +1,4 @@
-from http import HTTPStatus
-from flask import request
+
 from flask_restx import Namespace, Resource, fields, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..models.students import Student
@@ -42,7 +41,7 @@ class Signup(Resource):
         """
         
         data = namespace.payload
-        name = data.get("name"),
+        name = data.get("name")
         email = data['email']
         password_hash = generate_password_hash(data.get("password"))
         
@@ -59,7 +58,7 @@ class Signup(Resource):
             
             new_student.save()
             
-            return new_student, HTTPStatus.CREATED
+            return new_student, 201
 
     
 @namespace.route('/login')
@@ -85,7 +84,7 @@ class Login(Resource):
                 'refresh_token': refresh_token
             }
             
-            return response, HTTPStatus.CREATED
+            return response, 201
         
 @namespace.route('/refresh')
 class Refresh(Resource):
@@ -96,5 +95,5 @@ class Refresh(Resource):
         response = {
             'access_token':access_token
         }
-        return response, HTTPStatus.CREATED
+        return response, 201
     
