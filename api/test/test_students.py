@@ -128,7 +128,6 @@ class StudentTestCase(unittest.TestCase):
         
         #Test get student detail
         student = Student.query.filter_by(student_id=1).first()
-        student.gpa = 3.40
         response = self.client.get('/students/1/details')
         data = response.json
         
@@ -137,7 +136,9 @@ class StudentTestCase(unittest.TestCase):
         self.assertEqual(data['name'], 'Test Student')
         self.assertEqual(data['email'], 'teststudent@test.com')
         self.assertEqual(data['courses'], '[PY101]')
-
+        self.assertEqual(data['gpa'], student.gpa)
+        
+        
         
         
         
