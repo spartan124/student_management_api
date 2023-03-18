@@ -73,7 +73,7 @@ class StudentTestCase(unittest.TestCase):
         student2.save()
         
         #Test get all students
-        response = self.client.get('/', headers=headers)
+        response = self.client.get('/students/', headers=headers)
         student = Student.query.all()
         assert response.status_code == 200
         assert len(student) == 2
