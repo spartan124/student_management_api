@@ -65,18 +65,18 @@ To run the app locally, you need to have Python and pip installed. Then, follow 
         ```bash
         git clone <repository-url>
         cd <repository-name>
-        ```
+        
     
     2.  Create a virtual environment and activate it:
         ```bash
         python3 -m venv venv
         source venv/bin/activate
-        ```
+        
     
     3.  Install the dependencies:
         ```bash
         pip install -r requirements.txt
-        ```
+        
         note: you might want to #comment-out psycopg2 or psycopg2-binary if it affects install.
     
     4.  Set the environment variables:
@@ -87,7 +87,7 @@ To run the app locally, you need to have Python and pip installed. Then, follow 
             JWT_SECRET_KEY="type your supersecret key here"
             SECRET_KEY="supersecret key two"
             POSTGRESQL="leave empty or provide url"
-            ```
+            
     5.  Initialize the database:
         `flask db init
         
