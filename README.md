@@ -62,26 +62,26 @@ Usage
 To run the app locally, you need to have Python and pip installed. Then, follow these steps:
 
     1.  Clone the repository:
-        ```bash
+        ```bash:
         git clone <repository-url>
         cd <repository-name>
         
     
     2.  Create a virtual environment and activate it:
-        ```bash
+        ```bash:
         python3 -m venv venv
         source venv/bin/activate
         
     
     3.  Install the dependencies:
-        ```bash
+        ```bash:
         pip install -r requirements.txt
         
         note: you might want to #comment-out psycopg2 or psycopg2-binary if it affects install.
     
     4.  Set the environment variables:
         create .env file in the root of the project folder and populate with the following:
-            ```python
+            ```python:
             FLASK_APP='api'
             FLASK_DEBUG=True
             JWT_SECRET_KEY="type your supersecret key here"
