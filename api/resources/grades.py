@@ -19,6 +19,14 @@ grades_model = namespace.model(
 class Grade(Resource):
     @namespace.expect(grades_model)
     @namespace.marshal_with(grades_model)
+    @namespace.doc(
+        description="Add grade for a student enrolled course",
+        params={
+            "student_id":"ID of the Student",
+            "course_id": "ID of the Course"
+        }
+    )
+    @jwt_required()
     def post(self, student_id, course_id):
         """Add course grade for student
 
@@ -48,6 +56,14 @@ class Grade(Resource):
 @namespace.route('/student/<int:student_id>/course/<int:course_id>')
 class StudentCourseGrade(Resource):
     @namespace.marshal_with(grades_model)
+    @namespace.doc(
+        description="Get grade for a student enrolled course",
+        params={
+            "student_id":"ID of the Student",
+            "course_id": "ID of the Course"
+        }
+    )
+    @jwt_required()
     def get(self, student_id, course_id):
         """Retrieve a specific student grade for a specific course
 
