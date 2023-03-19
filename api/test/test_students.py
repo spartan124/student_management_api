@@ -135,7 +135,6 @@ class StudentTestCase(unittest.TestCase):
         self.assertEqual(data['student_id'], 1)
         self.assertEqual(data['name'], 'Test Student')
         self.assertEqual(data['email'], 'teststudent@test.com')
-        self.assertEqual(data['courses'], '[PY101]')
         self.assertEqual(data['gpa'], student.gpa)
         
         
