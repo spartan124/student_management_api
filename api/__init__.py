@@ -34,7 +34,7 @@ def create_app(config=config_dict['dev']):
     }
     
     api = Api(app,
-              title='School Management API',
+              title='Student Management API',
               description='A basic school management REST API service',
               authorizations=authorizations,
               security='Bearer Auth'

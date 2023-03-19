@@ -1,3 +1,2 @@
 #!/bin/bash
-
-tree -I '__pycache__|venv|migrations|migrations1' > project_tree.txt
+tree -I '__pycache__|venv|henvy|migrations|migrations1'  > "proj_tree.txt"
