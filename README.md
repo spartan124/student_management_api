@@ -66,9 +66,31 @@ To run the app locally, you need to have Python and pip installed. Then, follow 
         git clone <repository-url>
         cd <repository-name>
         ```
+    
     2.  Create a virtual environment and activate it:
         ```bash
         python3 -m venv venv
         source venv/bin/activate
         ```
     
+    3.  Install the dependencies:
+        ```bash
+        pip install -r requirements.txt
+        ```
+        note: you might want to #comment-out psycopg2 or psycopg2-binary if it affects install.
+    
+    4.  Set the environment variables:
+        create .env file in the root of the project folder and populate with the following:
+            ```python
+            FLASK_APP='api'
+            FLASK_DEBUG=True
+            JWT_SECRET_KEY="type your supersecret key here"
+            SECRET_KEY="supersecret key two"
+            POSTGRESQL="leave empty or provide url"
+            ```
+    5.  Initialize the database:
+        `flask db init
+        
+    6.  Run the flask app:
+        `flask run
+
