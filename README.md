@@ -3,6 +3,7 @@
 This is a Flask app that provides an API for managing courses, students, and teachers, and their relationships, such as student enrollments and grades. It includes a SQLite database to store data.
 
 ## Project Tree
+
 The project tree is organized as follows:
 
 ```markdown
@@ -43,6 +44,7 @@ The project tree is organized as follows:
 ├── requirements.txt
 └── server.py
 ```
+
 - Procfile: A configuration file for Heroku deployment.
 - README.md: This file.
 - api: The main package of the app, containing the source code.
@@ -59,26 +61,28 @@ The project tree is organized as follows:
 - server.py: Runs the Flask app.
 
 ## Usage
+
 To run the app locally, you need to have Python and pip installed. Then, follow these steps:
 
 1. Clone the repository:
-        ```bash:
-        git clone <repository-url>
-        cd <repository-name>
-        ```
-    
+        ```bash
+        $ git clone <repository-url>
+        $ cd <repository-name>
+```
+
 2. Create a virtual environment and activate it:
-        ```bash:
-        python3 -m venv venv
-        source venv/bin/activate
-        ```
-    
+        ```bash
+        $ python3 -m venv venv
+        $ source venv/bin/activate
+```
+
 3. Install the dependencies:
         ```bash:
-        pip install -r requirements.txt
-        ```
-        note: you might want to #comment-out psycopg2 or psycopg2-binary if it affects install.
-    
+        $ pip install -r requirements.txt
+
+```
+note you might want to #comment-out psycopg2 or psycopg2-binary if it affects install.
+
 4. Set the environment variables:
         create .env file in the root of the project folder and populate with the following:
             ```python:
@@ -87,10 +91,11 @@ To run the app locally, you need to have Python and pip installed. Then, follow 
             JWT_SECRET_KEY="type your supersecret key here"
             SECRET_KEY="supersecret key two"
             POSTGRESQL="leave empty or provide url"
-            ```
+```
+
 5. Initialize the database:
-        `flask db init
-        
+        ```bash:
+        $ flask db init
+
 6. Run the flask app:
         `flask run
-
