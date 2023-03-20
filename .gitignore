@@ -1,8 +1,6 @@
 .env
 venv
 __pycache__
-db.sqlite3
-migrations
+
 migrations1
-db1.sqlite3
-db.sqlite3
+
