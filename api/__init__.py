@@ -13,6 +13,7 @@ from .models.teachers import Teacher
 from .models.courses import Course
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+from flask_jwt_extended.exceptions import JWTExtendedException
 
 def create_app(config=config_dict['dev']):
     app = Flask(__name__)
@@ -40,7 +41,9 @@ def create_app(config=config_dict['dev']):
               security='Bearer Auth'
             )
     
-    
+    @api.errorhandler(JWTExtendedException)
+    def handle_jwt_exceptions(error):
+        return {'message': str(error)}, getattr(error, 'code', 401)
     
     api.add_namespace(auth_namespace)
     api.add_namespace(teacher_namespace)
@@ -48,6 +51,7 @@ def create_app(config=config_dict['dev']):
     api.add_namespace(course_namespace)
     api.add_namespace(grades_namespace)
     api.add_namespace(results_namespace)
+    
     @app.shell_context_processor
     def make_shell_context():
         return {
