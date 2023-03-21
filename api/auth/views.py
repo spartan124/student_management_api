@@ -1,17 +1,19 @@
 
 from flask_restx import Namespace, Resource, fields, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..models.students import Student
+from ..models import Student, Admin, Teacher
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 namespace = Namespace("auth", description="namespace for students authentication")
 
 signup_model = namespace.model(
-    "SignUp",
+    "StudentSignUp",
     {
         "name": fields.String(required=True, description="student's name"),
         "email": fields.String(required=True, description="Student's email address"),
-        "password": fields.String(required=True, description="Student's Account Password")
+        "password": fields.String(required=True, description="Student's Account Password"),
+        "role": fields.String(required=True, description="student role")
+
     }
 )
 
@@ -21,7 +23,7 @@ student_model = namespace.model(
         "student_id": fields.Integer(),
         "name": fields.String(required=True, description="Student's name"),
         "email": fields.String(required=True, description="Student's email"),
-        "password_hash": fields.String(required=True, description="Student's password"),
+        "role": fields.String(required=True, description="student role")
     }
 )
 
@@ -31,7 +33,18 @@ login_model = namespace.model(
         "password": fields.String(required=True, description="Student's password"),
     }
 )
-
+admin_signup_model = namespace.model( "Admin", {
+    "name": fields.String(required=True, description="Admin's name"),
+    "email": fields.String(required=True, description="Admin's email"),
+    "password": fields.String(required=True, description="Admins's password"),
+    "role": fields.String(required=True, description="Admin role")
+})
+admin_model = namespace.model("AdminModel", {
+    "admin_id": fields.Integer(description="Admin ID"),
+    "name": fields.String(required=True, description="Admin's name"),
+    "email": fields.String(required=True, description="Admin's email"),
+    "role": fields.String(required=True, description="Admin role")
+})
 @namespace.route('/signup')
 class Signup(Resource):
     @namespace.expect(signup_model)
@@ -96,4 +109,34 @@ class Refresh(Resource):
             'access_token':access_token
         }
         return response, 201
+
+@namespace.route('/admin/signup')
+class Signup(Resource):
+    @namespace.expect(admin_signup_model)
+    @namespace.marshal_with(admin_model)
+    def post(self):
+        """Create a new admin account
+        """
+        
+        data = namespace.payload
+        name = data["name"]
+        email = data['email']
+        password_hash = generate_password_hash(data["password"])
+        role = data['role']
+        admin = Admin.query.filter_by(email=email).first()
+        
+        if admin:
+            return abort(403, message = "Admin record already exists")
+        else:    
+            admin = Admin(
+                name = name,
+                email = email,
+                password_hash = password_hash,
+                role = role
+            )
+            
+            admin.save()
+            
+            return admin, 201
+
     
