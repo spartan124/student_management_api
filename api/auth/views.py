@@ -1,10 +1,10 @@
 
 from flask_restx import Namespace, Resource, fields, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..models import Student, Admin, Teacher
+from ..models import Student, Admin, Teacher, save, update, delete
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
-namespace = Namespace("auth", description="namespace for students authentication")
+namespace = Namespace("auth", description="namespace for Users authentication and Operations")
 
 signup_model = namespace.model(
     "StudentSignUp",
@@ -45,18 +45,33 @@ admin_model = namespace.model("AdminModel", {
     "email": fields.String(required=True, description="Admin's email"),
     "role": fields.String(required=True, description="Admin role")
 })
-@namespace.route('/signup')
+
+teacher_signup_model = namespace.model("TeacherX", {
+    "name": fields.String(description="Teacher's name"),
+    "email": fields.String(description="Teacher's email"),
+    "password": fields.String(description="Teacher's password"),
+    "role": fields.String(description="Teacher's role")
+})
+teacher_model = namespace.model("TeacherXY", {
+    "teacher_id": fields.Integer(description="Teacher's ID"),
+    "name": fields.String(description="Teacher's name"),
+    "email": fields.String(description="Teacher's email"),
+    "role": fields.String(description="Teacher's role")
+})
+@namespace.route('/student/signup')
 class Signup(Resource):
     @namespace.expect(signup_model)
     @namespace.marshal_with(student_model)
+    @namespace.doc(description="Signup a new student account")
     def post(self):
-        """Sign up a new student
+        """Sign up a new student account
         """
         
         data = namespace.payload
-        name = data.get("name")
+        name = data["name"]
         email = data['email']
-        password_hash = generate_password_hash(data.get("password"))
+        password_hash = generate_password_hash(data["password"])
+        role = data['role']
         
         student = Student.query.filter_by(email=email).first()
         
@@ -66,17 +81,82 @@ class Signup(Resource):
             new_student = Student(
                 name = name,
                 email = email,
-                password_hash = password_hash
+                password_hash = password_hash,
+                role = role
             )
             
-            new_student.save()
+            save(new_student)
             
             return new_student, 201
 
+@namespace.route('/admin/signup')
+class Signup(Resource):
+    @namespace.expect(admin_signup_model)
+    @namespace.marshal_with(admin_model)
+    @namespace.doc(description="Create a new admin account")
+    def post(self):
+        """Create a new admin account
+        """
+        
+        data = namespace.payload
+        name = data["name"]
+        email = data['email']
+        password_hash = generate_password_hash(data["password"])
+        role = data['role']
+        
+        admin = Admin.query.filter_by(email=email).first()
+        
+        if admin:
+            abort(403, message = "Admin record already exists")
+        else:    
+            admin = Admin(
+                name = name,
+                email = email,
+                password_hash = password_hash,
+                role = role
+            )
+            
+            save(admin)
+            
+            return admin, 201
+
+@namespace.route('/teacher/signup')
+class Signup(Resource):
+    @namespace.expect(teacher_signup_model)
+    @namespace.marshal_with(teacher_model)
+    @namespace.doc(description="Signup a new Teacher account")
+    def post(self):
+        """Create a new Teacher account
+        """
+        
+        data = namespace.payload
+        name = data["name"]
+        email = data['email']
+        password_hash = generate_password_hash(data["password"])
+        role = data['role']
+        
+        teacher = Teacher.query.filter_by(email=email).first()
+        
+        if teacher:
+            abort(403, message = "Teacher record already exists")
+        else:    
+            teacher = Teacher(
+                name = name,
+                email = email,
+                password_hash = password_hash,
+                role = role
+            )
+            
+            save(teacher)
+            
+            return teacher, 201
+
     
+  
 @namespace.route('/login')
 class Login(Resource):
     @namespace.expect(login_model)
+    @namespace.doc(description="Login a teacher, an admin or a student account and generate access & refresh tokens.")
     def post(self):
         """Generate JWT access and refresh tokens
         """
@@ -86,7 +166,9 @@ class Login(Resource):
         email = data.get('email')
         password = data.get('password')
         
+        admin = Admin.query.filter_by(email=email).first()
         user = Student.query.filter_by(email=email).first()
+        teacher = Teacher.query.filter_by(email=email).first()
         
         if (user is not None) and (check_password_hash(user.password_hash, password)):
             access_token = create_access_token(identity=user.email)
@@ -99,6 +181,30 @@ class Login(Resource):
             
             return response, 201
         
+        elif (admin is not None) and (check_password_hash(admin.password_hash, password)):
+            access_token = create_access_token(identity=admin.email)
+            refresh_token = create_refresh_token(identity=admin.email)
+            
+            response = {
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }
+            
+            return response, 201
+        elif (teacher is not None) and (check_password_hash(teacher.password_hash, password)):
+            access_token = create_access_token(identity=teacher.email)
+            refresh_token = create_refresh_token(identity=teacher.email)
+            
+            response = {
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }
+            
+            return response, 201
+        
+        else:
+            abort(403, message="Invalid login credentials. Check credentials and try again.")
+        
 @namespace.route('/refresh')
 class Refresh(Resource):
     @jwt_required(refresh=True)
@@ -110,33 +216,3 @@ class Refresh(Resource):
         }
         return response, 201
 
-@namespace.route('/admin/signup')
-class Signup(Resource):
-    @namespace.expect(admin_signup_model)
-    @namespace.marshal_with(admin_model)
-    def post(self):
-        """Create a new admin account
-        """
-        
-        data = namespace.payload
-        name = data["name"]
-        email = data['email']
-        password_hash = generate_password_hash(data["password"])
-        role = data['role']
-        admin = Admin.query.filter_by(email=email).first()
-        
-        if admin:
-            return abort(403, message = "Admin record already exists")
-        else:    
-            admin = Admin(
-                name = name,
-                email = email,
-                password_hash = password_hash,
-                role = role
-            )
-            
-            admin.save()
-            
-            return admin, 201
-
-    
