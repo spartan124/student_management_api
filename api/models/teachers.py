@@ -6,6 +6,7 @@ class Teacher(db.Model):
     teacher_id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(80), nullable=False, unique=True)
+    role = db.Column(db.String(), nullable=False)
     courses = db.relationship('Course', backref='student_courses')
     def __repr__(self):
         return f"<Teacher {self.name}>"
