@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
-from ..models import Student, Course, StudentCourse
+from ..models import Student, Course, StudentCourse, save, update, delete
 
 
 class GradeTestCase(unittest.TestCase):
@@ -29,9 +29,10 @@ class GradeTestCase(unittest.TestCase):
         }
         student1 = Student(name='Test Student',
                            email='teststudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role="student"
                            )
-        student1.save()
+        save(student1)
         
         course = Course(
             course_title="Test Course",
@@ -40,13 +41,13 @@ class GradeTestCase(unittest.TestCase):
             credit_unit=3,
             teacher_id=1,
         )
-        course.save()
+        save(course)
 
         student_course = StudentCourse(
             student_id=student1.student_id,
             course_id=course.course_id
         )
-        student_course.save()
+        save(student_course)
         
         payload = {
             "grade": "A"
@@ -65,9 +66,10 @@ class GradeTestCase(unittest.TestCase):
         }
         student1 = Student(name='Test Student',
                            email='teststudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role="student"
                            )
-        student1.save()
+        save(student1)
         
         course = Course(
             course_title="Test Course",
@@ -76,13 +78,13 @@ class GradeTestCase(unittest.TestCase):
             credit_unit=3,
             teacher_id=1,
         )
-        course.save()
+        save(course)
 
         student_course = StudentCourse(
             student_id=student1.student_id,
             course_id=course.course_id, grade="A"
         )
-        student_course.save()
+        save(student_course)
         response = self.client.get('/grades/student/{}/course/{}'.format(
             student_course.student_id, student_course.course_id), headers=headers,
         )

@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
-from ..models import Student, Course, StudentCourse
+from ..models import Student, Course, StudentCourse, save, update, delete
 
 
 class StudentTestCase(unittest.TestCase):
@@ -27,8 +27,9 @@ class StudentTestCase(unittest.TestCase):
             "email": "testuser@test.com",
             "password": "password",
             "name": "Student",
+            "role":"student"
         }
-        response = self.client.post("/auth/signup", json=data)
+        response = self.client.post("/auth/student/signup", json=data)
         user = Student.query.filter_by(email="testuser@test.com").first()
         assert user.email == "testuser@test.com"
         assert user.name == "Student"
@@ -36,7 +37,7 @@ class StudentTestCase(unittest.TestCase):
         
         # test a failed signup request (duplicate email)
         data = {'name': 'Duplicate Student', 'email': 'testuser@test.com', 'password': 'duplicatepassword'}
-        response = self.client.post('/auth/signup', json=data)
+        response = self.client.post('/auth/student/signup', json=data)
         self.assertEqual(response.status_code, 403)
 
     def test_student_login(self):
@@ -63,14 +64,16 @@ class StudentTestCase(unittest.TestCase):
         }
         student1 = Student(name='Test Student',
                            email='teststudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role='student'
                            )
-        student1.save()
+        save(student1)
         student2 = Student(name='Fun Student',
                            email='funstudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role='student'
                            )
-        student2.save()
+        save(student2)
         
         #Test get all students
         response = self.client.get('/students/', headers=headers)
@@ -87,9 +90,10 @@ class StudentTestCase(unittest.TestCase):
         }
         student = Student(name='Test Student',
                            email='teststudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role='student'
                            )
-        student.save()  
+        save(student)  
         course = Course(
             course_id=1,
             course_title="Intro to Python",
@@ -98,7 +102,7 @@ class StudentTestCase(unittest.TestCase):
             description="Beginners guide to python",
             teacher_id=1,
         )
-        course.save()
+        save(course)
         
         payload = {
             'student_id': student.student_id,
