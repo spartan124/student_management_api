@@ -36,6 +36,7 @@ class StudentTestCase(unittest.TestCase):
         assert response.status_code == 201
         
         # test a failed signup request (duplicate email)
+    def test_duplicate_student_registration(self):
         data = {'name': 'Duplicate Student', 'email': 'testuser@test.com', 'password': 'duplicatepassword'}
         response = self.client.post('/auth/student/signup', json=data)
         self.assertEqual(response.status_code, 403)

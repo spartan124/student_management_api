@@ -6,6 +6,7 @@ from .. import create_app
 from ..config.config import config_dict
 from ..db import db
 from ..models import Student, Course, StudentCourse, save, update, delete
+from . import create_course, create_student, create_teacher
 
 
 class GradeTestCase(unittest.TestCase):
@@ -23,28 +24,22 @@ class GradeTestCase(unittest.TestCase):
         self.client = None
 
     def test_add_student_grade(self):
-        token = create_access_token(identity='teststudent@test.io')
+        
+        teacher = create_teacher()
+        save(teacher)
+        
+        token = create_access_token(identity=teacher.email, additional_claims={'role': 'teacher'})
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student1 = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password',
-                           role="student"
-                           )
-        save(student1)
+        student = create_student() #student data in __init__.py
+        save(student)
         
-        course = Course(
-            course_title="Test Course",
-            course_code="TST101",
-            description="This is a test course",
-            credit_unit=3,
-            teacher_id=1,
-        )
+        course = create_course()
         save(course)
 
         student_course = StudentCourse(
-            student_id=student1.student_id,
+            student_id=student.student_id,
             course_id=course.course_id
         )
         save(student_course)
@@ -60,28 +55,20 @@ class GradeTestCase(unittest.TestCase):
         assert returned_student_course['grade'] == "A"
         
     def test_get_student_grade_in_course(self):
-        token = create_access_token(identity='teststudent@test.io')
+        student = create_student()
+        save(student)
+        
+        token = create_access_token(identity=student.email)
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student1 = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password',
-                           role="student"
-                           )
-        save(student1)
         
-        course = Course(
-            course_title="Test Course",
-            course_code="TST101",
-            description="This is a test course",
-            credit_unit=3,
-            teacher_id=1,
-        )
+        
+        course = create_course()
         save(course)
 
         student_course = StudentCourse(
-            student_id=student1.student_id,
+            student_id=student.student_id,
             course_id=course.course_id, grade="A"
         )
         save(student_course)
