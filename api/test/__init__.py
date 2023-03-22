@@ -20,3 +20,13 @@ def create_student():
     )
     return student
 
+
+def create_teacher():
+    teacher = Teacher(
+        name='Test Teacher',
+        email='testteacher@test.com',
+        password_hash='password',
+        role='teacher'
+    )
+    return teacher
+
