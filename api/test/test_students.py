@@ -6,6 +6,7 @@ from .. import create_app
 from ..config.config import config_dict
 from ..db import db
 from ..models import Student, Course, StudentCourse, save, update, delete
+from . import create_student, create_course, create_teacher
 
 
 class StudentTestCase(unittest.TestCase):
@@ -37,19 +38,17 @@ class StudentTestCase(unittest.TestCase):
         
         # test a failed signup request (duplicate email)
     def test_duplicate_student_registration(self):
-        data = {'name': 'Duplicate Student', 'email': 'testuser@test.com', 'password': 'duplicatepassword'}
+        student = create_student()
+        save(student)
+        data = {'name': 'Duplicate Student', 'email': 'teststudent@test.com', 'password': 'duplicatepassword', 'role':'student'}
         response = self.client.post('/auth/student/signup', json=data)
         self.assertEqual(response.status_code, 403)
 
-    def test_student_login(self):
-        email = 'testuser@test.com'
-        password = 'password'
-        password_hash = generate_password_hash(password)
-        check_password = check_password_hash(password_hash, password)
+    def test_user_login(self):
 
         data = {
-            'email': email,
-            'password': check_password
+            'email': 'teststudent@test.com',
+            'password':'password'
         }
 
 
@@ -59,21 +58,14 @@ class StudentTestCase(unittest.TestCase):
         assert response.status_code == 200
     
     def test_get_all_students(self):
-        token = create_access_token(identity='teststudent@test.io')
+        student = create_student()
+        token = create_access_token(identity=student.email, additional_claims={'role': 'admin'})
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student1 = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password',
-                           role='student'
-                           )
-        save(student1)
-        student2 = Student(name='Fun Student',
-                           email='funstudent@test.com',
-                           password_hash='password',
-                           role='student'
-                           )
+        
+        save(student)
+        student2 = create_student(name="fun student", email="funstud@test.com", password_hash='password', role='student')
         save(student2)
         
         #Test get all students
@@ -89,20 +81,10 @@ class StudentTestCase(unittest.TestCase):
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password',
-                           role='student'
-                           )
+        student = create_student()
         save(student)  
-        course = Course(
-            course_id=1,
-            course_title="Intro to Python",
-            course_code="PY101",
-            credit_unit=3,
-            description="Beginners guide to python",
-            teacher_id=1,
-        )
+        
+        course = create_course()
         save(course)
         
         payload = {
@@ -128,7 +110,7 @@ class StudentTestCase(unittest.TestCase):
         #Test get enrolled courses
         response = self.client.get('/students/{}/courses'.format(student.student_id), headers=headers)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json[0]['course_code'], 'PY101')
+        self.assertEqual(response.json[0]['course_code'], 'TST101')
         
         
         #Test get student detail
