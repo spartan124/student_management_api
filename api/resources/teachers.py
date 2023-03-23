@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, abort, fields
 from flask_jwt_extended import jwt_required
-from ..models import Teacher, save, update, delete
+from ..models import Teacher, save, update, delete, role_required
 
 namespace = Namespace("teachers", description="Operations on Teachers")
 
@@ -31,38 +31,18 @@ course_model = namespace.model(
 
 
 @namespace.route("/teacher")
-class AddGetTeachers(Resource):
-    @namespace.expect(teacher_model)
-    @namespace.marshal_with(teacher_clone_model)
-    @namespace.doc(
-        description="Adding a Teacher's Record to the Teacher database"
-    )
-    @jwt_required()
-    def post(self):
-        """Add a Teacher"""
-        data = namespace.payload
-        name = data.get("name")
-        email = data.get("email")
-        teacher = Teacher.query.filter_by(email=email).first()
-        if teacher:
-            abort(403, message="Teacher already exists")
-
-        add_teacher = Teacher(
-            name=name,
-            email=email)
-
-        save(add_teacher)
-        return add_teacher, 201
+class GetTeachers(Resource):
 
     @namespace.marshal_with(teacher_clone_model)
     @namespace.doc(
         description="Get all teachers in the Teacher database"
     )
     @jwt_required()
+    @role_required('teacher')
     def get(self):
         """Get all Teachers"""
 
-        teachers = Teacher.query.all()
+        teachers = Teacher.query.filter_by(role='teacher').all()
 
         return teachers, 200
 

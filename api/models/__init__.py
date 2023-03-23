@@ -5,7 +5,7 @@ from .student_course import StudentCourse
 from .teachers import Teacher
 from .admin import Admin
 from ..db import db
-
+from flask_restx import abort
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
@@ -16,7 +16,7 @@ def role_required(role):
             verify_jwt_in_request()
             current_user = {'role': get_jwt_identity()}
             if current_user['role'] != role:
-                return {'message': 'User not Authorized.'}, 403
+                abort(403, message='User not Authorized.')
             return fn(*args, **kwargs)
         return wrapper
     return decorator
