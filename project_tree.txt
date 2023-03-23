@@ -1,0 +1,37 @@
+.
+├── Procfile
+├── README.md
+├── api
+│   ├── __init__.py
+│   ├── auth
+│   │   └── views.py
+│   ├── config
+│   │   ├── config.py
+│   │   ├── db.sqlite3
+│   │   └── db1.sqlite3
+│   ├── db.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   ├── courses.py
+│   │   ├── results.py
+│   │   ├── student_course.py
+│   │   ├── students.py
+│   │   └── teachers.py
+│   ├── resources
+│   │   ├── courses.py
+│   │   ├── grades.py
+│   │   ├── results.py
+│   │   ├── students.py
+│   │   └── teachers.py
+│   └── test
+│       ├── __init__.py
+│       ├── test_courses.py
+│       ├── test_grades.py
+│       ├── test_students.py
+│       └── test_teachers.py
+├── project_tree.txt
+├── requirements.txt
+├── server.py
+└── tree.txt
+
+6 directories, 28 files

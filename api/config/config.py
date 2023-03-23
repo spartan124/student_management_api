@@ -8,9 +8,10 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class Config:
     SECRET_KEY = config("SECRET_KEY", "secret")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=120)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=72)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=120)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=272)
     JWT_SECRET_KEY = config('JWT_SECRET_KEY')
+    ERROR_INCLUDE_MESSAGE = False
 
 
 class DevConfig(Config):
@@ -24,7 +25,7 @@ class DevConfig(Config):
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
     SQLALCHEMY_DATABASE_URI = "sqlite://"
 
 class ProdConfig(Config):

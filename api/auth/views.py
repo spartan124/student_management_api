@@ -1,6 +1,5 @@
-from http import HTTPStatus
-from flask import request
-from flask_restx import Namespace, Resource, fields
+
+from flask_restx import Namespace, Resource, fields, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..models.students import Student
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
@@ -42,16 +41,25 @@ class Signup(Resource):
         """
         
         data = namespace.payload
+        name = data.get("name")
+        email = data['email']
+        password_hash = generate_password_hash(data.get("password"))
         
-        new_student = Student(
-            name = data.get("name"),
-            email = data.get("email"),
-            password_hash = generate_password_hash(data.get("password"))
-        )
+        student = Student.query.filter_by(email=email).first()
         
-        new_student.save()
-        
-        return new_student, HTTPStatus.CREATED
+        if student:
+            return abort(403, message = "Student record already exists")
+        else:    
+            new_student = Student(
+                name = name,
+                email = email,
+                password_hash = password_hash
+            )
+            
+            new_student.save()
+            
+            return new_student, 201
+
     
 @namespace.route('/login')
 class Login(Resource):
@@ -76,7 +84,7 @@ class Login(Resource):
                 'refresh_token': refresh_token
             }
             
-            return response, HTTPStatus.CREATED
+            return response, 201
         
 @namespace.route('/refresh')
 class Refresh(Resource):
@@ -87,5 +95,5 @@ class Refresh(Resource):
         response = {
             'access_token':access_token
         }
-        return response, HTTPStatus.CREATED
+        return response, 201
     
