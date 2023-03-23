@@ -45,14 +45,18 @@ class StudentTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_user_login(self):
+        email = 'testuser@test.com'
+        password = 'password'
+        password_hash = generate_password_hash(password)
+        check_password = check_password_hash(password_hash, password)
 
         data = {
-            'email': 'teststudent@test.com',
-            'password':'password'
+            'email': email,
+            'password': check_password
         }
 
 
-         # test a successful login request
+        #Test a successful login request
         response = self.client.post('auth/login', json=data)
 
         assert response.status_code == 200
