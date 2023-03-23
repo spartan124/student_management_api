@@ -5,7 +5,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
-from ..models import Student, Course, StudentCourse
+from ..models import Student, Course, StudentCourse, save, update, delete
+from . import create_student, create_course, create_teacher
 
 
 class StudentTestCase(unittest.TestCase):
@@ -27,19 +28,23 @@ class StudentTestCase(unittest.TestCase):
             "email": "testuser@test.com",
             "password": "password",
             "name": "Student",
+            "role":"student"
         }
-        response = self.client.post("/auth/signup", json=data)
+        response = self.client.post("/auth/student/signup", json=data)
         user = Student.query.filter_by(email="testuser@test.com").first()
         assert user.email == "testuser@test.com"
         assert user.name == "Student"
         assert response.status_code == 201
         
         # test a failed signup request (duplicate email)
-        data = {'name': 'Duplicate Student', 'email': 'testuser@test.com', 'password': 'duplicatepassword'}
-        response = self.client.post('/auth/signup', json=data)
+    def test_duplicate_student_registration(self):
+        student = create_student()
+        save(student)
+        data = {'name': 'Duplicate Student', 'email': 'teststudent@test.com', 'password': 'duplicatepassword', 'role':'student'}
+        response = self.client.post('/auth/student/signup', json=data)
         self.assertEqual(response.status_code, 403)
 
-    def test_student_login(self):
+    def test_user_login(self):
         email = 'testuser@test.com'
         password = 'password'
         password_hash = generate_password_hash(password)
@@ -51,26 +56,21 @@ class StudentTestCase(unittest.TestCase):
         }
 
 
-         # test a successful login request
+        #Test a successful login request
         response = self.client.post('auth/login', json=data)
 
         assert response.status_code == 200
     
     def test_get_all_students(self):
-        token = create_access_token(identity='teststudent@test.io')
+        student = create_student()
+        token = create_access_token(identity=student.email, additional_claims={'role': 'admin'})
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student1 = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password'
-                           )
-        student1.save()
-        student2 = Student(name='Fun Student',
-                           email='funstudent@test.com',
-                           password_hash='password'
-                           )
-        student2.save()
+        
+        save(student)
+        student2 = create_student(name="fun student", email="funstud@test.com", password_hash='password', role='student')
+        save(student2)
         
         #Test get all students
         response = self.client.get('/students/', headers=headers)
@@ -85,20 +85,11 @@ class StudentTestCase(unittest.TestCase):
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        student = Student(name='Test Student',
-                           email='teststudent@test.com',
-                           password_hash='password'
-                           )
-        student.save()  
-        course = Course(
-            course_id=1,
-            course_title="Intro to Python",
-            course_code="PY101",
-            credit_unit=3,
-            description="Beginners guide to python",
-            teacher_id=1,
-        )
-        course.save()
+        student = create_student()
+        save(student)  
+        
+        course = create_course()
+        save(course)
         
         payload = {
             'student_id': student.student_id,
@@ -123,7 +114,7 @@ class StudentTestCase(unittest.TestCase):
         #Test get enrolled courses
         response = self.client.get('/students/{}/courses'.format(student.student_id), headers=headers)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json[0]['course_code'], 'PY101')
+        self.assertEqual(response.json[0]['course_code'], 'TST101')
         
         
         #Test get student detail

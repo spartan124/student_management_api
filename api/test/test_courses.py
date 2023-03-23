@@ -1,11 +1,13 @@
-import unittest
 import json
-from werkzeug.security import check_password_hash, generate_password_hash
+import unittest
+
 from flask_jwt_extended import create_access_token, create_refresh_token
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
-from ..models import Student, Course, StudentCourse
+from ..models import Course, Student, StudentCourse, save
 from ..resources.courses import clone_course_model
 
 
@@ -139,14 +141,16 @@ class CoursesTestCase(unittest.TestCase):
         
         student1 = Student(name='Test Student',
                            email='teststudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role='student'
                            )
-        student1.save()
+        save(student1)
         student2 = Student(name='Fun Student',
                            email='funstudent@test.com',
-                           password_hash='password'
+                           password_hash='password',
+                           role='student'
                            )
-        student2.save()
+        save(student2)
         
         course = Course(
             course_title="Test Course",
@@ -155,19 +159,19 @@ class CoursesTestCase(unittest.TestCase):
             credit_unit=3,
             teacher_id=1,
         )
-        course.save()
+        save(course)
 
         student_course1 = StudentCourse(
             course_id=course.course_id,
             student_id=student1.student_id
         )
-        student_course1.save()
+        save(student_course1)
         
         student_course2 = StudentCourse(
             course_id=course.course_id,
             student_id=student2.student_id
         )
-        student_course2.save()
+        save(student_course2)
         
         response = self.client.get("/course/{}/students".format(course.course_id), headers=headers)
         self.assertEqual(response.status_code, 200)

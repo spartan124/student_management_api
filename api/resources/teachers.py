@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, abort, fields
 from flask_jwt_extended import jwt_required
-from ..models.teachers import Teacher
+from ..models import Teacher, save, update, delete
 
 namespace = Namespace("teachers", description="Operations on Teachers")
 
@@ -51,7 +51,7 @@ class AddGetTeachers(Resource):
             name=name,
             email=email)
 
-        add_teacher.save()
+        save(add_teacher)
         return add_teacher, 201
 
     @namespace.marshal_with(teacher_clone_model)
@@ -108,7 +108,7 @@ class GetTeacherandTeacherCourses(Resource):
         if not teacher:
             abort(404, message="Teacher not found in database.")
         
-        teacher.delete()
+        delete(teacher)
         return {"message": "Teacher Successfully deleted from teacher database."}
         
 @namespace.route('/<int:teacher_id>/details')

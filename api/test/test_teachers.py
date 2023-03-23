@@ -7,8 +7,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .. import create_app
 from ..config.config import config_dict
 from ..db import db
-from ..models.courses import Course
-from ..models.teachers import Teacher
+from ..models import Course, Teacher, save, update, delete
+
 
 
 class TeacherTestCase(unittest.TestCase):
@@ -31,9 +31,9 @@ class TeacherTestCase(unittest.TestCase):
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        data = {"name": "Mr Jones", "email": "jones@schoolteacher.io"}
+        data = {"name": "Mr Jones", "email": "jones@schoolteacher.io", 'role':'teacher', 'password':'password'}
 
-        response = self.client.post("/teachers/teacher", json=data, headers=headers)
+        response = self.client.post("auth/teacher/signup", json=data)
         teacher = Teacher.query.filter_by(email="jones@schoolteacher.io").first()
         assert response.status_code == 201
         assert teacher.email == "jones@schoolteacher.io"
@@ -48,13 +48,15 @@ class TeacherTestCase(unittest.TestCase):
         }
         data = {
             'name': "Mr. Jones",
-            'email': "mrjones@school.io"
+            'email': "mrjones@school.io",
+            'password': "password",
+            'role': "teacher",
         }
-        response =self.client.post('/teachers/teacher', json=data, headers=headers)
+        response =self.client.post('auth/teacher/signup', json=data)
         teacher = Teacher.query.filter_by(teacher_id=1).first()
         assert teacher.courses == []
-        #Test get teacher courses
         
+        #Test get teacher courses
         course1 = Course(
             course_id=1,
             course_title="Intro to Python",
@@ -73,7 +75,7 @@ class TeacherTestCase(unittest.TestCase):
             teacher_id=1,
         )
         teacher.courses = [course1, course2]
-        teacher.save()
+        save(teacher)
         
         response = self.client.get("teachers/{}/".format(teacher.teacher_id), headers=headers)
 
