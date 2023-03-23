@@ -38,7 +38,7 @@ class GetTeachers(Resource):
         description="Get all teachers in the Teacher database"
     )
     @jwt_required()
-    @role_required('teacher')
+    # @role_required('teacher')
     def get(self):
         """Get all Teachers"""
 
