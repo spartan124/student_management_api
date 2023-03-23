@@ -48,7 +48,7 @@ class GetTeachers(Resource):
 
 
 @namespace.route("/<int:teacher_id>/")
-class GetTeacherandTeacherCourses(Resource):
+class GetUpdateDeleteTeacherandTeacherCourses(Resource):
     @namespace.marshal_with(course_model)
     @namespace.doc(
         description="Get all Courses taught by the specific Teacher",
