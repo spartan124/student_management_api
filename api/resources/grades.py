@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields, abort
 
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.student_course import StudentCourse
 from ..models.courses import Course
 from ..models.results import StudentResult
@@ -84,4 +84,32 @@ class StudentCourseGrade(Resource):
 
         return student_course, 200
 
-    
+    @namespace.expect(grades_model)
+    @namespace.marshal_with(grades_model)
+    @namespace.doc(
+        description="Update a course grade for a student",
+        params={
+            "student_id":"ID of the student",
+            "course_id":"ID of the course to update grade"
+        }
+    )
+    @jwt_required()
+    def put(self, student_id, course_id):
+        """Update a student's course grade
+
+        Args:
+            student_id (_int_): ID of the student
+            course_id (_int_): ID of the course
+        """
+        current_user = {"student_id": get_jwt_identity()}
+        data = namespace.payload
+        grade_to_update = StudentCourse.query.filter_by(student_id=student_id, course_id=course_id).first()
+        if current_user['student_id'] == student_id:
+            
+            if not grade_to_update:
+                abort(404, message="Course record not Found for this student")
+            grade_to_update.grade = data['grade']
+            grade_to_update.update()
+            
+            return 201, grade_to_update
+        return {"message":"User not authorized to update grade record"}, 401

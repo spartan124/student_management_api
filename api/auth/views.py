@@ -1,8 +1,10 @@
 
-from flask_restx import Namespace, Resource, fields, abort
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt_identity, jwt_required)
+from flask_restx import Namespace, Resource, abort, fields
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..models import Student, Admin, Teacher, save, update, delete
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+
+from ..models import Admin, Student, Teacher, delete, save, update
 
 namespace = Namespace("auth", description="namespace for Users authentication and Operations")
 
@@ -171,8 +173,8 @@ class Login(Resource):
         teacher = Teacher.query.filter_by(email=email).first()
         
         if (user is not None) and (check_password_hash(user.password_hash, password)):
-            access_token = create_access_token(identity=user.email)
-            refresh_token = create_refresh_token(identity=user.email)
+            access_token = create_access_token(identity=user.email, additional_claims={'role': 'student'})
+            refresh_token = create_refresh_token(identity=user.email, additional_claims={'role': 'student'})
             
             response = {
                 'access_token': access_token,
@@ -182,8 +184,8 @@ class Login(Resource):
             return response, 201
         
         elif (admin is not None) and (check_password_hash(admin.password_hash, password)):
-            access_token = create_access_token(identity=admin.email)
-            refresh_token = create_refresh_token(identity=admin.email)
+            access_token = create_access_token(identity=admin.email, additional_claims={'role': 'admin'})
+            refresh_token = create_refresh_token(identity=admin.email, additional_claims={'role': 'admin'})
             
             response = {
                 'access_token': access_token,
@@ -192,8 +194,8 @@ class Login(Resource):
             
             return response, 201
         elif (teacher is not None) and (check_password_hash(teacher.password_hash, password)):
-            access_token = create_access_token(identity=teacher.email)
-            refresh_token = create_refresh_token(identity=teacher.email)
+            access_token = create_access_token(identity=teacher.email, additional_claims={'role': 'teacher'})
+            refresh_token = create_refresh_token(identity=teacher.email, additional_claims={'role': 'teacher'})
             
             response = {
                 'access_token': access_token,
