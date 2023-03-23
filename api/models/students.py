@@ -7,6 +7,7 @@ class Student(db.Model):
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(80), nullable=False, unique=True)
     password_hash = db.Column(db.Text(), nullable=False)
+    role = db.Column(db.String(), nullable=False)
     gpa = db.Column(db.Float())
     courses = db.relationship("Course", secondary="student_course")
     student_courses = db.relationship("StudentCourse", backref="students")
