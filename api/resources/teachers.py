@@ -5,10 +5,11 @@ from ..models import Teacher, save, update, delete, role_required
 namespace = Namespace("teachers", description="Operations on Teachers")
 
 teacher_model = namespace.model(
-    "Teacher",
+    "TeacherX",
     {
         "name": fields.String(description="Teacher's name"),
         "email": fields.String(description="Teacher's email"),
+        "role": fields.String(description="Teacher role")
     },
 )
 teacher_clone_model = namespace.clone(
@@ -70,7 +71,30 @@ class GetUpdateDeleteTeacherandTeacherCourses(Resource):
         courses = teacher.courses
 
         return courses, 200
-        
+    @namespace.expect(teacher_model)
+    @namespace.marshal_with(teacher_clone_model)
+    @namespace.doc(
+        description="Update Records of a Teacher using the Teacher ID",
+        params = {
+            'teacher_id': "ID of the specific teacher"
+        }
+    )
+    @jwt_required()
+    def put(self, teacher_id):
+        """Update a Teacher Record from the Teacher database
+
+        Args:
+            teacher_id (_int_): Teacher ID
+        """
+        data = namespace.payload
+        teacher = Teacher.query.filter_by(teacher_id=teacher_id).first()
+        if not teacher:
+            abort(404, message="Teacher Record not found")
+        teacher.name = data['name']
+        teacher.email = data['email']
+        update(teacher)
+        return teacher, 200
+    
     @namespace.doc(
         description="Delete Records of a Teacher using the Teacher ID",
         params = {

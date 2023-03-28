@@ -9,64 +9,40 @@ from ..models import Admin, Student, Teacher, delete, save, update
 namespace = Namespace("auth", description="namespace for Users authentication and Operations")
 
 signup_model = namespace.model(
-    "StudentSignUp",
+    "UserSignUp",
     {
-        "name": fields.String(required=True, description="student's name"),
-        "email": fields.String(required=True, description="Student's email address"),
-        "password": fields.String(required=True, description="Student's Account Password"),
-        "role": fields.String(required=True, description="student role")
+        "name": fields.String(required=True, description="User's name"),
+        "email": fields.String(required=True, description="User's email address"),
+        "password": fields.String(required=True, description="User's Account Password"),
+        "role": fields.String(required=True, description="User's role")
 
     }
 )
 
-student_model = namespace.model(
-    "Student",
+user_model = namespace.model(
+    "UserModel",
     {
-        "student_id": fields.Integer(),
-        "name": fields.String(required=True, description="Student's name"),
-        "email": fields.String(required=True, description="Student's email"),
-        "role": fields.String(required=True, description="student role")
+        #"id": fields.Integer(attribute=lambda obj: f"{obj.role}_id"), #if obj.role in ['teacher','student','admin'] else None),
+        "name": fields.String(required=True, description="User's name"),
+        "email": fields.String(required=True, description="User's email"),
+        "role": fields.String(required=True, description="User's role")
     }
 )
 
 login_model = namespace.model(
     "Login", {
-        "email": fields.String(required=True, description="Student's email"),
-        "password": fields.String(required=True, description="Student's password"),
+        "email": fields.String(required=True, description="User's email"),
+        "password": fields.String(required=True, description="User's password"),
     }
 )
-admin_signup_model = namespace.model( "Admin", {
-    "name": fields.String(required=True, description="Admin's name"),
-    "email": fields.String(required=True, description="Admin's email"),
-    "password": fields.String(required=True, description="Admins's password"),
-    "role": fields.String(required=True, description="Admin role")
-})
-admin_model = namespace.model("AdminModel", {
-    "admin_id": fields.Integer(description="Admin ID"),
-    "name": fields.String(required=True, description="Admin's name"),
-    "email": fields.String(required=True, description="Admin's email"),
-    "role": fields.String(required=True, description="Admin role")
-})
 
-teacher_signup_model = namespace.model("TeacherX", {
-    "name": fields.String(description="Teacher's name"),
-    "email": fields.String(description="Teacher's email"),
-    "password": fields.String(description="Teacher's password"),
-    "role": fields.String(description="Teacher's role")
-})
-teacher_model = namespace.model("TeacherXY", {
-    "teacher_id": fields.Integer(description="Teacher's ID"),
-    "name": fields.String(description="Teacher's name"),
-    "email": fields.String(description="Teacher's email"),
-    "role": fields.String(description="Teacher's role")
-})
-@namespace.route('/student/signup')
+@namespace.route('/signup')
 class Signup(Resource):
     @namespace.expect(signup_model)
-    @namespace.marshal_with(student_model)
-    @namespace.doc(description="Signup a new student account")
+    @namespace.marshal_with(user_model)
+    @namespace.doc(description="Signup a new User account")
     def post(self):
-        """Sign up a new student account
+        """Sign up a new user account
         """
         
         data = namespace.payload
@@ -75,85 +51,60 @@ class Signup(Resource):
         password_hash = generate_password_hash(data["password"])
         role = data['role']
         
-        student = Student.query.filter_by(email=email).first()
+        if role == 'teacher':
+            
+            teacher = Teacher.query.filter_by(email=email).first()
         
-        if student:
-            return abort(403, message = "Student record already exists")
-        else:    
-            new_student = Student(
-                name = name,
-                email = email,
-                password_hash = password_hash,
-                role = role
-            )
+            if teacher:
+                abort(403, message = "Teacher record already exists")
+            else:    
+                teacher = Teacher(
+                    name = name,
+                    email = email,
+                    password_hash = password_hash,
+                    role = role
+                )
+                
+                save(teacher)
+                
+                return teacher, 201
             
-            save(new_student)
-            
-            return new_student, 201
+        elif role == 'student':
 
-@namespace.route('/admin/signup')
-class Signup(Resource):
-    @namespace.expect(admin_signup_model)
-    @namespace.marshal_with(admin_model)
-    @namespace.doc(description="Create a new admin account")
-    def post(self):
-        """Create a new admin account
-        """
-        
-        data = namespace.payload
-        name = data["name"]
-        email = data['email']
-        password_hash = generate_password_hash(data["password"])
-        role = data['role']
-        
-        admin = Admin.query.filter_by(email=email).first()
-        
-        if admin:
-            abort(403, message = "Admin record already exists")
-        else:    
-            admin = Admin(
-                name = name,
-                email = email,
-                password_hash = password_hash,
-                role = role
-            )
+            student = Student.query.filter_by(email=email).first()
             
-            save(admin)
+            if student:
+                return abort(403, message = "Student record already exists")
+            else:    
+                new_student = Student(
+                    name = name,
+                    email = email,
+                    password_hash = password_hash,
+                    role = role
+                )
+                
+                save(new_student)
+                
+                return new_student, 201
             
-            return admin, 201
+        elif role == 'admin':
+            admin = Admin.query.filter_by(email=email).first()
+            
+            if admin:
+                abort(403, message = "Admin record already exists")
+            else:    
+                admin = Admin(
+                    name = name,
+                    email = email,
+                    password_hash = password_hash,
+                    role = role
+                )
+                
+                save(admin)
+                
+                return admin, 201
+        abort (404, "This role does not exist, contact admin")
 
-@namespace.route('/teacher/signup')
-class Signup(Resource):
-    @namespace.expect(teacher_signup_model)
-    @namespace.marshal_with(teacher_model)
-    @namespace.doc(description="Signup a new Teacher account")
-    def post(self):
-        """Create a new Teacher account
-        """
-        
-        data = namespace.payload
-        name = data["name"]
-        email = data['email']
-        password_hash = generate_password_hash(data["password"])
-        role = data['role']
-        
-        teacher = Teacher.query.filter_by(email=email).first()
-        
-        if teacher:
-            abort(403, message = "Teacher record already exists")
-        else:    
-            teacher = Teacher(
-                name = name,
-                email = email,
-                password_hash = password_hash,
-                role = role
-            )
-            
-            save(teacher)
-            
-            return teacher, 201
-
-    
   
 @namespace.route('/login')
 class Login(Resource):

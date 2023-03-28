@@ -33,7 +33,7 @@ class TeacherTestCase(unittest.TestCase):
         }
         data = {"name": "Mr Jones", "email": "jones@schoolteacher.io", 'role':'teacher', 'password':'password'}
 
-        response = self.client.post("auth/teacher/signup", json=data)
+        response = self.client.post("auth/signup", json=data)
         teacher = Teacher.query.filter_by(email="jones@schoolteacher.io").first()
         assert response.status_code == 201
         assert teacher.email == "jones@schoolteacher.io"
@@ -52,7 +52,7 @@ class TeacherTestCase(unittest.TestCase):
             'password': "password",
             'role': "teacher",
         }
-        response =self.client.post('auth/teacher/signup', json=data)
+        response =self.client.post('auth/signup', json=data)
         teacher = Teacher.query.filter_by(teacher_id=1).first()
         assert teacher.courses == []
         
