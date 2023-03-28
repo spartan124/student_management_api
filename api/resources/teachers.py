@@ -94,6 +94,7 @@ class GetUpdateDeleteTeacherandTeacherCourses(Resource):
         teacher.email = data['email']
         update(teacher)
         return teacher, 200
+    
     @namespace.doc(
         description="Delete Records of a Teacher using the Teacher ID",
         params = {
