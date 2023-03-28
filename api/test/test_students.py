@@ -30,7 +30,7 @@ class StudentTestCase(unittest.TestCase):
             "name": "Student",
             "role":"student"
         }
-        response = self.client.post("/auth/student/signup", json=data)
+        response = self.client.post("/auth/signup", json=data)
         user = Student.query.filter_by(email="testuser@test.com").first()
         assert user.email == "testuser@test.com"
         assert user.name == "Student"
@@ -41,7 +41,7 @@ class StudentTestCase(unittest.TestCase):
         student = create_student()
         save(student)
         data = {'name': 'Duplicate Student', 'email': 'teststudent@test.com', 'password': 'duplicatepassword', 'role':'student'}
-        response = self.client.post('/auth/student/signup', json=data)
+        response = self.client.post('/auth/signup', json=data)
         self.assertEqual(response.status_code, 403)
 
     def test_user_login(self):
