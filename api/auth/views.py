@@ -11,10 +11,10 @@ namespace = Namespace("auth", description="namespace for Users authentication an
 signup_model = namespace.model(
     "UserSignUp",
     {
-        "name": fields.String(required=True, description="student's name"),
-        "email": fields.String(required=True, description="Student's email address"),
-        "password": fields.String(required=True, description="Student's Account Password"),
-        "role": fields.String(required=True, description="student role")
+        "name": fields.String(required=True, description="User's name"),
+        "email": fields.String(required=True, description="User's email address"),
+        "password": fields.String(required=True, description="User's Account Password"),
+        "role": fields.String(required=True, description="User's role")
 
     }
 )
@@ -23,16 +23,16 @@ user_model = namespace.model(
     "UserModel",
     {
         #"id": fields.Integer(attribute=lambda obj: f"{obj.role}_id"), #if obj.role in ['teacher','student','admin'] else None),
-        "name": fields.String(required=True, description="Student's name"),
-        "email": fields.String(required=True, description="Student's email"),
-        "role": fields.String(required=True, description="student role")
+        "name": fields.String(required=True, description="User's name"),
+        "email": fields.String(required=True, description="User's email"),
+        "role": fields.String(required=True, description="User's role")
     }
 )
 
 login_model = namespace.model(
     "Login", {
-        "email": fields.String(required=True, description="Student's email"),
-        "password": fields.String(required=True, description="Student's password"),
+        "email": fields.String(required=True, description="User's email"),
+        "password": fields.String(required=True, description="User's password"),
     }
 )
 
@@ -40,7 +40,7 @@ login_model = namespace.model(
 class Signup(Resource):
     @namespace.expect(signup_model)
     @namespace.marshal_with(user_model)
-    @namespace.doc(description="Signup a new student account")
+    @namespace.doc(description="Signup a new User account")
     def post(self):
         """Sign up a new user account
         """
